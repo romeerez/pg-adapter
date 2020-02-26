@@ -32,19 +32,21 @@ const db = new Adapter({
 Let's assume we got `exapmle` table with `id` and `name` column.
 
 ```js
-await db.connect() // if you forgot to connect it will connect automatically when making query
+await db.connect()
+// if you forgot to connect it will connect automatically
+// when making query
 
 const objects = await db.objects('SELECT * FROM example')
-objects === [{id: 1, name: 'vasya'}, {id: 2, name: 'petya'}]
+// [{id: 1, name: 'vasya'}, {id: 2, name: 'petya'}]
 
 const arrays = await db.arrays('SELECT * FROM example')
-arrays === [[1, 'vasya'], [2, 'petya']]
+// [[1, 'vasya'], [2, 'petya']]
 
 const value = await db.value('SELECT count(*) FROM users')
-value === 2
+// 2
 
 const nothing = await db.exec('TRUNCATE TABLE users CASCADE')
-nothing === undefined
+// undefined
 
 await db.close() // it will wait till all queries finish
 ```
