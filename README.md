@@ -5,7 +5,7 @@
 Why another adapter for Postgresql?
 There is already `pg`, it's popular, has community. 
 
-Well, it may seem more convenient and faster in microbenchmark.
+Well, this adapter may seem more convenient and faster in microbenchmark.
 
 ## Getting started
 ```
