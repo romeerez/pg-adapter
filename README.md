@@ -51,6 +51,15 @@ const nothing = await db.exec('TRUNCATE TABLE users CASCADE')
 await db.close() // it will wait till all queries finish
 ```
 
+For escaping values use `quote`:
+
+```js
+const rawValue = 'may contain sql injection'
+
+// quoted value is safe:
+db.objects(`SELECT * FROM table WHERE a = ${db.quote(rawValue)}`)
+```
+
 ## Pool
 
 It has very easy to use pool:
@@ -163,3 +172,7 @@ db.exec('some query')
 db.exec('another query')
 await db.sync() // will wait for both
 ```
+
+### Prepared statements, streams, cursor
+
+Maybe in future, these features are not very important as for me.
