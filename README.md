@@ -51,24 +51,6 @@ const nothing = await db.exec('TRUNCATE TABLE users CASCADE')
 await db.close() // it will wait till all queries finish
 ```
 
-## Log
-
-`pg-adapter` has single dependency - chalk -
-for nice outputting executed queries to show query time, like this:
-
-```
-(1.3ms) SELECT * FROM users
-```
-
-But with color. Blue color for completed and red for error query.
-
-Log can be disabled via constructor property `log` from above.
-
-## Errors
-
-When error happens it's stacktrace points to place where you were making this query.
-Which is not true for `pg` adapter, so considered as feature.
-
 ## Pool
 
 It has very easy to use pool:
@@ -86,6 +68,36 @@ db.value('SELECT 2').then(console.log)
 // this will wait for any free connection
 db.value('SELECT 3').then(console.log)
 ```
+
+Connection pool is hidden under the hood,
+this means it's very easy to make many queries efficiently:
+
+```js
+const db = new Adapter({pool: 3})
+const [donuts, muffins, chebureks] = await Promise.all([
+  db.objects('SELECT * FROM donuts'),
+  db.objects('SELECT * FROM muffins'),
+  db.objects('SELECT * FROM chebureks'),
+])
+```
+
+## Log
+
+`pg-adapter` has single dependency - chalk -
+for nice outputting executed queries to show query time, like this:
+
+```
+(1.3ms) SELECT * FROM users
+```
+
+But with color. Blue color for completed and red for error query.
+
+Log can be disabled via constructor property `log` from above.
+
+## Errors
+
+When error happens it's stacktrace points to place where you were making this query.
+Which is not true for `pg` adapter, so considered as feature.
 
 ## Types
 
