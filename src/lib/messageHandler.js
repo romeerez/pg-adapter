@@ -33,7 +33,7 @@ const portalSuspendedCode = 's'.charCodeAt(0)
 
 const copy = (socket, data, bufferPos, dataPos, size) => {
   if (socket.buffer.length < size)
-    socket.buffer = Buffer.alloc(size * 2, socket.buffer)
+    socket.buffer = Buffer.alloc(size * 1.5, socket.buffer)
   data.copy(socket.buffer, bufferPos, dataPos)
 }
 

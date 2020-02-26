@@ -1,5 +1,5 @@
-const {decodeInt32, skipMessage} = require('../utils')
-const {objectsMode, arraysMode, valueMode, skipMode} = require('./parseDescription')
+const {decodeInt32} = require('../utils')
+const {objectsMode, arraysMode, skipMode} = require('./parseDescription')
 
 module.exports = {
   parseRow: (socket, data, pos) => {
@@ -9,10 +9,6 @@ module.exports = {
       return
 
     const {decodeTypes} = socket.adapter
-    let nextMessagePos
-    if (mode === valueMode) {
-      nextMessagePos = skipMessage(data, pos)
-    }
 
     pos += 7
 
@@ -29,12 +25,11 @@ module.exports = {
       if (size === -1) {
         value = null
       } else {
-        value = data.slice(pos, pos + size)
         const decode = decodeTypes[type || types[c]]
         if (decode)
-          value = decode(value)
+          value = decode(data.slice(pos, pos + size))
         else
-          value = value.toString()
+          value = data.toString('utf8', pos, pos + size)
         pos += size
       }
       if (mode === objectsMode)
@@ -43,7 +38,6 @@ module.exports = {
         row[c] = value
       else {
         task.result = value
-        pos = nextMessagePos
         task.parseResultMode = skipMode
         return
       }

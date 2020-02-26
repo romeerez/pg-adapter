@@ -1,4 +1,4 @@
-const {decodeInt32, decodeInt16, skipMessage} = require('../utils')
+const {decodeInt32, decodeInt16} = require('../utils')
 
 const objectsMode = 0
 const arraysMode = 1
@@ -11,14 +11,12 @@ module.exports = {
     const {task} = socket
     let mode = task.parseResultMode
     if (mode === skipMode) {
-      pos = skipMessage(data, pos)
       socket.result = null
     } else {
       const columnsCount = decodeInt16(data, pos + 5)
       if (mode === valueMode) {
         const to = data.indexOf('\0', pos + 7)
         socket.type = decodeInt32(data, to + 7)
-        pos = skipMessage(data, pos)
         socket.result = null
       } else {
         pos += 7
