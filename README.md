@@ -80,10 +80,10 @@ const db = new Adapter({pool: 2})
 // this will take first connection
 db.value('SELECT 1').then(console.log)
 
-// this will take first connection
+// this will take second connection
 db.value('SELECT 2').then(console.log)
 
-// this will take first connection
+// this will wait for any free connection
 db.value('SELECT 3').then(console.log)
 ```
 
