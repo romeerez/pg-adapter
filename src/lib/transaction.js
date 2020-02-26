@@ -6,9 +6,8 @@ const close = (transaction) => {
   transactions.splice(transactions.indexOf(transaction), 1)
 }
 
-const closedError = () => {
-  throw new Error('transaction is closed')
-}
+const closedError = () =>
+  Promise.reject('transaction is closed')
 
 const finish = async (transaction, command) => {
   transaction.performQuery = closedError
