@@ -85,6 +85,27 @@ db.value('SELECT 2').then(console.log)
 db.value('SELECT 3').then(console.log)
 ```
 
+## Types
+
+By default numbers, booleans and dates are parsing from response.
+To add json parsing, for example:
+
+```sql
+SELECT typname, oid, typarray FROM pg_type ORDER BY oid
+```
+
+This will give info for all types in database, get needed `oid`.
+
+```js
+const db = new Adapter(params)
+Object.assign(db.decodeTypes, {
+  114: JSON.parse, // for json
+  3802: JSON.parse, // for jsonb
+})
+```
+
+Null from db won't get to parser.
+
 ## Transactions
 
 First syntax:
