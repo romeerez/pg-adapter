@@ -30,7 +30,7 @@ const db = new Adapter({
 
 ## Querying
 
-Let's assume we got `exapmle` table with `id` and `name` column.
+Let's assume we got `example` table with `id` and `name` column.
 
 ```js
 await db.connect()
