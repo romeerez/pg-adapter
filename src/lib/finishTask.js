@@ -5,7 +5,7 @@ exports.finishTask = (socket) => {
   if (socket.error)
     task.reject(socket.error)
   else
-    task.resolve(task.result)
+    task.resolve(socket.result)
 
   socket.task = null
 

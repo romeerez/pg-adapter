@@ -17,6 +17,7 @@ module.exports = {
     socket.error = null
     socket.task = task
     socket.size = 0
+    socket.resultNum = 0
     const len = task.message.length + 5
     const message = Buffer.alloc(len + 1)
     message[0] = queryCode

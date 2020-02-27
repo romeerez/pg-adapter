@@ -3,8 +3,15 @@ const {objectsMode, arraysMode, skipMode} = require('./parseDescription')
 
 module.exports = {
   parseRow: (socket, data, pos) => {
-    const {task, columnsCount, type, names, types} = socket
-    let {parseResultMode: mode, result} = task
+    const {
+      columnsCount,
+      type,
+      names,
+      types,
+      result,
+      resultNum,
+      parseResultMode: mode
+    } = socket
     if (mode === skipMode)
       return
 
@@ -37,11 +44,17 @@ module.exports = {
       else if (mode === arraysMode)
         row[c] = value
       else {
-        task.result = value
-        task.parseResultMode = skipMode
+        if (resultNum === 0)
+          socket.result = value
+        else
+          result[resultNum] = value
+        socket.parseResultMode = skipMode
         return
       }
     }
-    result.push(row)
+    if (resultNum === 0)
+      result.push(row)
+    else
+      result[resultNum].push(row)
   }
 }

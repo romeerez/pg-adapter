@@ -3,6 +3,7 @@ const {parseDescription} = require('./handlers/parseDescription')
 const {parseRow} = require('./handlers/parseRow')
 const {parseError} = require('./handlers/error')
 const {auth} = require('./handlers/auth')
+const {complete} = require('./handlers/complete')
 
 const authenticationCode = 'R'.charCodeAt(0)
 const backendKeyDataCode = 'K'.charCodeAt(0)
@@ -73,9 +74,10 @@ exports.handleMessage = (socket, data) => {
         break
     } else if (code === authenticationCode) {
       socket.error = auth(socket, buffer, pos)
+    } else if (code === commandCompleteCode) {
+      complete(socket)
     } else {
       if (
-        code !== commandCompleteCode &&
         code !== parameterStatusCode &&
         code !== backendKeyDataCode
       ) {

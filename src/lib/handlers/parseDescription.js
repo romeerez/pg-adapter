@@ -9,15 +9,15 @@ module.exports = {
   objectsMode, arraysMode, valueMode, skipMode,
   parseDescription: (socket, data, pos) => {
     const {task} = socket
-    let mode = task.parseResultMode
-    if (mode === skipMode) {
-      socket.result = null
-    } else {
+    let result, mode = task.parseResultMode
+    if (mode === skipMode)
+      result = null
+    else {
       const columnsCount = decodeInt16(data, pos + 5)
       if (mode === valueMode) {
         const to = data.indexOf('\0', pos + 7)
         socket.type = decodeInt32(data, to + 7)
-        socket.result = null
+        result = null
       } else {
         pos += 7
         const names = new Array(columnsCount)
@@ -31,9 +31,16 @@ module.exports = {
         }
         socket.names = names
         socket.types = types
-        task.result = []
+        result = []
       }
       socket.columnsCount = columnsCount
     }
+    if (socket.resultNum === 0)
+      socket.result = result
+    else if (socket.resultNum === 1)
+      socket.result = [socket.result, result]
+    else
+      socket.result[socket.resultNum] = result
+    socket.parseResultMode = socket.task.parseResultMode
   }
 }

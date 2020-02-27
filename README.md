@@ -61,6 +61,15 @@ const rawValue = 'may contain sql injection'
 db.objects(`SELECT * FROM table WHERE a = ${db.quote(rawValue)}`)
 ```
 
+You can send multiple queries and receive array of results.
+In general, I don't recommend it, but if you have small pool size and many clients
+it can be efficient.
+
+```js
+const [a, b, c] = await db.value('SELECT 1; SELECT 2; SELECT 3')
+// a = 1, b = 2, c = 3
+```
+
 ## Pool
 
 It has very easy to use pool:
