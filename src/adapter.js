@@ -49,7 +49,9 @@ module.exports = class Adapter {
       setupLog(this.sockets)
   }
 
-  quote = quote
+  quote(...args) {
+    return quote(...args)
+  }
 
   performQuery(mode, message) {
     return query(this, mode, message, new Error())
