@@ -43,12 +43,13 @@ module.exports = class Adapter {
     this.connected = false
     this.connect = connect.bind(null, this)
     this.close = close.bind(null, this)
-    this.quote = quote
     this.adapter = this
     this.transactions = []
     if (log)
       setupLog(this.sockets)
   }
+
+  quote = quote
 
   performQuery(mode, message) {
     return query(this, mode, message, new Error())
