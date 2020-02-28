@@ -32,48 +32,49 @@ const emptyQueryResponseCode = 'I'.charCodeAt(0)
 const parameterDescriptionCode = 't'.charCodeAt(0)
 const portalSuspendedCode = 's'.charCodeAt(0)
 
-const copy = (socket, data, bufferPos, dataPos, size) => {
-  if (socket.buffer.length < size)
-    socket.buffer = Buffer.alloc(size * 1.5, socket.buffer)
-  data.copy(socket.buffer, bufferPos, dataPos)
-}
+const copy = (socket, data, dataPos) =>
+  data.copy(socket.buffer, socket.cutMessageAllocated, dataPos)
 
-exports.handleMessage = (socket, data) => {
+const handleMessage = (socket, data, size = data.length) => {
   let pos = 0
-  let buffer, len
-  let {size} = socket
-  if (size) {
-    size = socket.size + data.length
-    copy(socket, data, socket.size, 0, size)
-    socket.size = size
-    buffer = socket.buffer
-    len = socket.len
-  } else {
-    buffer = data
-    size = data.length
-    len = getMessageLength(buffer, pos)
+  let len = socket.cutMessageLength
+  if (len !== 0) {
+    if (len > socket.cutMessageAllocated + data.length) {
+      copy(socket, data, 0)
+      socket.cutMessageAllocated += data.length
+      return
+    }
+
+    const copySize = len - socket.cutMessageAllocated
+    copy(socket, data, 0)
+    socket.cutMessageLength = 0
+    socket.cutMessageAllocated = 0
+    handleMessage(socket, socket.buffer, len)
+    pos = copySize + 1
   }
+  len = getMessageLength(data, pos)
   while (pos < size) {
     if (pos + len > size) {
-      if (socket.size === 0)
-        copy(socket, data, 0, pos, size)
-      socket.size = size - pos
-      socket.len = len
+      if (socket.buffer.length < len)
+        socket.buffer = Buffer.alloc(len + 1, socket.buffer)
+      copy(socket, data, pos)
+      socket.cutMessageAllocated = size - pos
+      socket.cutMessageLength = len
       break
     }
-    const code = buffer[pos]
+    const code = data[pos]
     if (code === dataRowCode) {
-      parseRow(socket, buffer, pos)
+      parseRow(socket, data, pos)
     } else if (code === rowDescriptionCode) {
-      parseDescription(socket, buffer, pos)
+      parseDescription(socket, data, pos)
     } else if (code === readyForQueryCode) {
       return socket.finishTask()
     } else if (code === errorResponseCode) {
-      const {level} = parseError(socket, buffer, pos)
+      const {level} = parseError(socket, data, pos)
       if (level !== 'ERROR')
         break
     } else if (code === authenticationCode) {
-      socket.error = auth(socket, buffer, pos)
+      socket.error = auth(socket, data, pos)
     } else if (code === commandCompleteCode) {
       complete(socket)
     } else {
@@ -84,7 +85,9 @@ exports.handleMessage = (socket, data) => {
         console.warn(`Handling of ${String.fromCharCode(code)} code is not implemented yet`)
       }
     }
-    pos = skipMessage(buffer, pos)
-    len = getMessageLength(buffer, pos)
+    pos = skipMessage(data, pos)
+    len = getMessageLength(data, pos)
   }
 }
+
+exports.handleMessage = handleMessage

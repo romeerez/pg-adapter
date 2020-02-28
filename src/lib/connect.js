@@ -22,6 +22,8 @@ module.exports = {
     for (let i = 0; i < pool; i++) {
       const socket = sockets[i]
       socket.task = {error, resolve: noop, reject: throwError}
+      socket.cutMessageLength = 0
+      socket.cutMessageAllocated = 0
 
       socket.connect(port, host, () => {
         socket.write(startupMessage(user, database))

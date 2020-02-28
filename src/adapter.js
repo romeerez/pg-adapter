@@ -34,8 +34,6 @@ module.exports = class Adapter {
       const socket = new Socket({readable: true, writable: true})
       socket.on('data', handleMessage.bind(null, socket))
       socket.buffer = Buffer.alloc(10000)
-      socket.size = 0
-      socket.len = 0
       socket.adapter = this
       socket.transaction = this
       socket.finishTask = finishTask.bind(null, socket)
