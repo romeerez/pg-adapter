@@ -61,9 +61,7 @@ For escaping values use javascript's template strings:
 const rawValue = 'may contain sql injection'
 
 // quoted value is safe:
-db.objects`
-  SELECT * FROM table WHERE a = ${rawValue}
-`
+db.query`SELECT * FROM table WHERE a = ${rawValue}`
 // spaces on start and end will be trimmed
 ```
 
