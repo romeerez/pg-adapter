@@ -50,12 +50,12 @@ const value = await db.value('SELECT count(*) FROM users')
 // 2
 
 const nothing = await db.exec('TRUNCATE TABLE users CASCADE')
-// undefined
+// ignore result (null)
 
 await db.close() // it will wait till all queries finish
 ```
 
-For escaping values use javascript's template strings:
+Queries can handle escaping by themselves using template strings:
 
 ```js
 const rawValue = 'may contain sql injection'
@@ -65,18 +65,24 @@ db.query`SELECT * FROM table WHERE a = ${rawValue}`
 // spaces on start and end will be trimmed
 ```
 
-Also for escaping there are `sql` and `quote` functions:
+Better to use `sql` function, then the editor can highlight syntax:
 
 ```js
-const {sql, quote} = require('pg-adapter')
+const {sql} = require('pg-adapter')
 
 const value = 'value'
 const safeSql = sql`SELECT * FROM table WHERE a = ${value}`
-const sameSql = `SELECT * FROM table WHERE a = ${quote(value)}`
+db.sql`template ${'string'}` // adapter instance includes it
+```
 
-// adapter instance includes these functions
-db.sql`template ${'string'}`
-db.quote(value)
+For escaping single value there is `quote`:
+
+```js
+const {quote} = require('pg-adapter')
+
+const value = 'value'
+const safeSqlValue = quote(value)
+const dbHasIt = db.quote(value)
 ```
 
 You can send multiple queries and receive array of results.
