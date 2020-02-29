@@ -22,6 +22,5 @@ test('connect', async () => {
   expect(db.connected).toBe(true)
   await promise
   expect(db.sockets[0].connected)
-  console.log((await db.query`SELECT * FROM users WHERE ${true}`).length)
   await db.close()
 })
