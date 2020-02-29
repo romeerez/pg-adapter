@@ -40,6 +40,9 @@ await db.connect()
 const objects = await db.objects('SELECT * FROM example')
 // [{id: 1, name: 'vasya'}, {id: 2, name: 'petya'}]
 
+const sameObjects = await db.query('SELECT * FROM example')
+// .query is alias for .objects
+
 const arrays = await db.arrays('SELECT * FROM example')
 // [[1, 'vasya'], [2, 'petya']]
 
@@ -52,13 +55,30 @@ const nothing = await db.exec('TRUNCATE TABLE users CASCADE')
 await db.close() // it will wait till all queries finish
 ```
 
-For escaping values use `quote`:
+For escaping values use javascript's template strings:
 
 ```js
 const rawValue = 'may contain sql injection'
 
 // quoted value is safe:
-db.objects(`SELECT * FROM table WHERE a = ${db.quote(rawValue)}`)
+db.objects`
+  SELECT * FROM table WHERE a = ${rawValue}
+`
+// spaces on start and end will be trimmed
+```
+
+Also for escaping there are `sql` and `quote` functions:
+
+```js
+const {sql, quote} = require('pg-adapter')
+
+const value = 'value'
+const safeSql = sql`SELECT * FROM table WHERE a = ${value}`
+const sameSql = `SELECT * FROM table WHERE a = ${quote(value)}`
+
+// adapter instance includes these functions
+db.sql`template ${'string'}`
+db.quote(value)
 ```
 
 You can send multiple queries and receive array of results.

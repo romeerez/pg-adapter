@@ -4,6 +4,7 @@ const {connect} = require('./lib/connect')
 const {query} = require('./lib/query')
 const {objectsMode, arraysMode, valueMode, skipMode} = require('./lib/handlers/parseDescription')
 const {quote} = require('./lib/quote')
+const {sql, sql2} = require('./lib/sql')
 const {setupLog} = require('./lib/setupLog')
 const {finishTask} = require('./lib/finishTask')
 const {transaction} = require('./lib/transaction')
@@ -11,7 +12,7 @@ const {sync} = require('./lib/sync')
 const {close} = require('./lib/close')
 const decodeTypes = require('./lib/types')
 
-module.exports = class Adapter {
+class Adapter {
   constructor({
     host = '127.0.0.1',
     port = 5432,
@@ -44,33 +45,32 @@ module.exports = class Adapter {
     this.connect = connect.bind(null, this)
     this.close = close.bind(null, this)
     this.adapter = this
+    this.quote = quote
+    this.sql = sql
+    this.query = this.objects
     this.transactions = []
     if (log)
       setupLog(this.sockets)
   }
 
-  quote(...args) {
-    return quote(...args)
+  performQuery(mode, message, args) {
+    return query(this, mode, sql2(message, args), new Error())
   }
 
-  performQuery(mode, message) {
-    return query(this, mode, message, new Error())
+  objects(sql, ...args) {
+    return this.performQuery(objectsMode, sql, args)
   }
 
-  objects(message) {
-    return this.performQuery(objectsMode, message)
+  arrays(sql, ...args) {
+    return this.performQuery(arraysMode, sql, args)
   }
 
-  arrays(message) {
-    return this.performQuery(arraysMode, message)
+  value(sql, ...args) {
+    return this.performQuery(valueMode, sql, args)
   }
 
-  value(message) {
-    return this.performQuery(valueMode, message)
-  }
-
-  exec(message) {
-    return this.performQuery(skipMode, message)
+  exec(sql, ...args) {
+    return this.performQuery(skipMode, sql, args)
   }
 
   sync() {
@@ -81,3 +81,5 @@ module.exports = class Adapter {
     return transaction(this.adapter, this, fn)
   }
 }
+
+module.exports = {Adapter, quote, sql}

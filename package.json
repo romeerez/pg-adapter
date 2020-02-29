@@ -16,5 +16,8 @@
   ],
   "dependencies": {
     "chalk": "^3.0.0"
+  },
+  "devDependencies": {
+    "jest": "^25.1.0"
   }
 }

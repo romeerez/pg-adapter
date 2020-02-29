@@ -1,5 +1,6 @@
 const {query} = require('./query')
 const {skipMode} = require('./handlers/parseDescription')
+const {sql2} = require('./sql')
 
 const close = (transaction) => {
   const transactions = transaction.adapter.transactions
@@ -32,11 +33,11 @@ const finish = async (transaction, command) => {
 const commit = (transaction) => finish(transaction, 'COMMIT')
 const rollback = (transaction) => finish(transaction, 'ROLLBACK')
 
-const performQuery = (transaction, mode, message) => {
+const performQuery = (transaction, mode, message, ...args) => {
   if (transaction.error)
     return Promise.reject(transaction.error)
   return new Promise((resolve, reject) => {
-    query(transaction, mode, message, new Error(), resolve, (err) => {
+    query(transaction, mode, sql2(message, args), new Error(), resolve, (err) => {
       reject(err)
       if (transaction.error)
         return
