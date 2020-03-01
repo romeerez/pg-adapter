@@ -1,6 +1,6 @@
 ## pg-adapter
 
-(adapter means client for sending *raw* sql to db and parse response)
+Adapter means client for sending *raw* sql to db and parse response, for full-featured ORM see [porm](https://www.npmjs.com/package/porm)
 
 Why another adapter for Postgresql?
 There is already `pg`, it's popular, has community. 
