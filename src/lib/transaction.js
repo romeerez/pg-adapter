@@ -17,13 +17,7 @@ const finish = async (transaction, command) => {
     transaction, skipMode, command, new Error(), null, null, null, true
   )
 
-  const resolve = (err) => {
-    if (err) transaction.error = err
-    if (transaction.error) transaction.reject(transaction.error)
-    else transaction.resolve()
-  }
-
-  promise.then(resolve, resolve)
+  promise.then(transaction.resolve, transaction.reject)
 
   try { await promise } catch (err) {}
 
@@ -74,7 +68,15 @@ exports.transaction = (adapter, parentTransaction, fn) => {
   })
 
   if (fn) {
-    return Promise.all([promise, fn(transaction)])
+    const fnPromise = new Promise(async (resolve, reject) => {
+      try {
+        await fn(transaction)
+        resolve()
+      } catch (err) {
+        reject(err)
+      }
+    })
+    return Promise.all([promise, fnPromise])
   } else {
     transaction.promise = promise
     return transaction

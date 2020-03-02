@@ -186,12 +186,10 @@ Second syntax:
 
 ```js
 const promise = db.transaction(async t => {
-  try {
-    await t.exec('make several')
-    await t.exec('queries')
-  } catch (error) {
-    console.log('transaction failed')
-  }
+  // try-catch is done in transaction function
+  await t.exec('make several')
+  await t.exec('queries')
+  console.log('transaction failed')
   // commit automatically
 })
 promise.then(() => console.log('transaction complete'))
