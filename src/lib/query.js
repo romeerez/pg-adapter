@@ -1,17 +1,17 @@
 const {nextTask} = require('./nextTask')
 
 module.exports = {
-  query(transaction, parseResultMode, message, error, resolve, reject, startTransaction, closeTransaction) {
+  query(transaction, parseResultMode, message, error, taskParams) {
     transaction.connect()
     const task = {
       parseResultMode,
       message,
       error,
-      startTransaction,
-      closeTransaction,
       resultNum: 0,
       result: null,
     }
+    if (taskParams)
+      Object.assign(task, taskParams)
     task.transaction = transaction
     if (!transaction.task) {
       transaction.task = task
@@ -24,10 +24,7 @@ module.exports = {
       transaction.task.last.next = task
       transaction.task.last = task
     }
-    if (resolve && reject) {
-      task.resolve = resolve
-      task.reject = reject
-    } else {
+    if (!taskParams || !task.resolve) {
       return new Promise((resolve, reject) => {
         task.resolve = resolve
         task.reject = reject

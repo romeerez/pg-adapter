@@ -1,4 +1,4 @@
-## pg-adapter
+# pg-adapter
 
 Adapter means client for sending *raw* sql to db and parse response, for full-featured ORM see [porm](https://www.npmjs.com/package/porm)
 
@@ -7,6 +7,18 @@ There is already `pg`, it's popular, has community.
 
 Well, this adapter may seem more convenient and faster in microbenchmarks
 (faster then pg-native too, for single connection and pool, bench: https://gitlab.com/snippets/1945002).
+
+## Table of Contents
+* [Getting started](#getting-started)
+* [Making queries](#making-queries)
+* [Escape values](#escape-values)
+* [Pool](#pool)
+* [Log](#log)
+* [Errors](#errors)
+* [Types](#types)
+* [Transactions](#transactions)
+* [Prepared statements](#prepared-statements)
+* [Sync](#sync)
 
 ## Getting started
 ```
@@ -28,7 +40,7 @@ const db = new Adapter({
 })
 ```
 
-## Querying
+## Making queries
 
 Let's assume we got `example` table with `id` and `name` column.
 
@@ -54,6 +66,8 @@ const nothing = await db.exec('TRUNCATE TABLE users CASCADE')
 
 await db.close() // it will wait till all queries finish
 ```
+
+## Escape values
 
 Queries can handle escaping by themselves using template strings:
 
@@ -195,7 +209,38 @@ const promise = db.transaction(async t => {
 promise.then(() => console.log('transaction complete'))
 ```
 
-### Sync
+## Prepared statements
+
+Prepared statement is query which get parsed and planned just once and then can be called many times.
+
+Such query is bit faster.
+
+```js
+const usersQuery = db.prepare('usersQuery', 'text', 'integer', 'date')
+  `SELECT * FROM users WHERE name = $1 AND age = $2 AND last_activity >= $3`
+```
+
+First argument is query name which must be unique, then query parameter types.
+SQL is passed outside of `()` i.e db.prepare(name, ...args)`sql query`,
+yes it looks strange, but that's how JS template strings works.
+
+So, query can have interpolated args `${someValue}` which gets escaped.
+
+```js
+const name = 'David'
+const age = 74
+const users = await usersQuery.query`${name}, ${age}, now() - interval '1 year'`
+```
+
+Here again template string is used so two values escapes and last parameter is SQL statement.
+
+```js
+usersQuery.query(1, 2, "now() - interval '1 year'")
+```
+
+This is the same query, also works, just do not pass dangerous parameters that came from users.
+
+## Sync
 
 `sync` method gives promise of all running tasks will be completed (or failed):
 
@@ -204,7 +249,3 @@ db.exec('some query')
 db.exec('another query')
 await db.sync() // will wait for both
 ```
-
-### Prepared statements, streams, cursor
-
-Maybe in future, these features are not very important as for me.

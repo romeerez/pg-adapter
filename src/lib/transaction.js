@@ -14,7 +14,9 @@ const finish = async (transaction, command) => {
   transaction.performQuery = closedError
 
   const promise = query(
-    transaction, skipMode, command, new Error(), null, null, null, true
+    transaction, skipMode, command, new Error(), {
+      closeTransaction: true
+    }
   )
 
   promise.then(transaction.resolve, transaction.reject)
@@ -31,19 +33,22 @@ const performQuery = (transaction, mode, message, ...args) => {
   if (transaction.error)
     return Promise.reject(transaction.error)
   return new Promise((resolve, reject) => {
-    query(transaction, mode, sql2(message, args), new Error(), resolve, (err) => {
-      reject(err)
-      if (transaction.error)
-        return
+    query(transaction, mode, sql2(message, args), new Error(), {
+      resolve,
+      reject: (err) => {
+        reject(err)
+        if (transaction.error)
+          return
 
-      transaction.error = err
-      let {task} = transaction
-      while (task) {
-        task.reject(err)
-        task = task.next
+        transaction.error = err
+        let {task} = transaction
+        while (task) {
+          task.reject(err)
+          task = task.next
+        }
+        transaction.task = null
+        transaction.rollback()
       }
-      transaction.task = null
-      transaction.rollback()
     })
   })
 }
@@ -60,7 +65,9 @@ exports.transaction = (adapter, parentTransaction, fn) => {
 
   adapter.transactions.push(transaction)
 
-  query(parentTransaction, skipMode, 'BEGIN', new Error(), null, null, transaction)
+  query(parentTransaction, skipMode, 'BEGIN', new Error(), {
+    startTransaction: transaction
+  })
 
   const promise = new Promise((resolve, reject) => {
     transaction.resolve = resolve

@@ -10,6 +10,7 @@ const {finishTask} = require('./lib/finishTask')
 const {transaction} = require('./lib/transaction')
 const {sync} = require('./lib/sync')
 const {close} = require('./lib/close')
+const {prepare} = require('./lib/prepare')
 const decodeTypes = require('./lib/types')
 
 class Adapter {
@@ -39,6 +40,7 @@ class Adapter {
       socket.transaction = this
       socket.finishTask = finishTask.bind(null, socket)
       socket.query = socket.write.bind(socket)
+      socket.prepared = {}
       this.sockets[i] = socket
     }
     this.connected = false
@@ -48,6 +50,7 @@ class Adapter {
     this.quote = quote
     this.sql = sql
     this.query = this.objects
+    this.prepare = prepare
     this.transactions = []
     if (log)
       setupLog(this.sockets)

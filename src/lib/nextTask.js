@@ -19,13 +19,20 @@ module.exports = {
     socket.cutMessageAllocated = 0
     socket.cutMessageLength = 0
     socket.resultNum = 0
-    const len = task.message.length + 5
-    const message = Buffer.alloc(len + 1)
-    message[0] = queryCode
-    encodeInt32(message, 1, len)
-    message.fill(task.message, 5)
-    message[len] = 0
-    socket.query(message)
+
+    let message
+    if (!task.prepared || socket.prepared[task.prepared.name])
+      message = task.message
+    else
+      message = task.prepared.sql
+
+    const len = message.length + 5
+    const buffer = Buffer.alloc(len + 1)
+    buffer[0] = queryCode
+    encodeInt32(buffer, 1, len)
+    buffer.fill(message, 5)
+    buffer[len] = 0
+    socket.query(buffer)
     return true
   }
 }
