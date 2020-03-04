@@ -1,6 +1,7 @@
 const {query} = require('./query')
 const {objectsMode, arraysMode, valueMode, skipMode} = require('./handlers/parseDescription')
 const {sql2} = require('./sql')
+const quote = require('./quote')
 
 exports.prepare = function(name, ...args) {
   return (prepareSql) => {
@@ -19,7 +20,7 @@ exports.prepare = function(name, ...args) {
         if (parts.raw)
           message += `(${sql2(parts, args.slice(1))})`
         else
-          message += `(${args.join(', ')})`
+          message += `(${args.map(quote).join(', ')})`
       }
       return query(this, mode, message, new Error(), {prepared})
     }

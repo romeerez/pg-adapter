@@ -1,5 +1,3 @@
-const quote = require('./quote')
-
 const sql2 = (parts, args) => {
   if (typeof parts === 'string')
     return parts

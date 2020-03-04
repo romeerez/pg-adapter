@@ -238,7 +238,8 @@ Here again template string is used so two values escapes and last parameter is S
 usersQuery.query(1, 2, "now() - interval '1 year'")
 ```
 
-This is the same query, also works, just do not pass dangerous parameters that came from users.
+This will not work because sql will be escaped.
+But if you don't need sql in parameter it will work fine.
 
 ## Sync
 
