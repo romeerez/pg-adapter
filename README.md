@@ -40,6 +40,27 @@ const db = new Adapter({
 })
 ```
 
+Initializing from database url (Heroku compatible):
+
+```js
+const db = Adapter.fromURL(
+  'postgres://user:password@host:port/database',
+  {pool: 5, log: false}
+)
+```
+
+If no url provided it will try `DATABASE_URL` env variable:
+
+```js
+const db = Adapter.fromURL({pool: 8})
+```
+
+Url parsing function is available by importing:
+
+```js
+import {parseURL} from 'pg-adapter'
+```
+
 ## Making queries
 
 Let's assume we got `example` table with `id` and `name` column.

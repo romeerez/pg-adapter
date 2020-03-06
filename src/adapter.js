@@ -11,6 +11,7 @@ const {transaction} = require('./lib/transaction')
 const {sync} = require('./lib/sync')
 const {close} = require('./lib/close')
 const {prepare} = require('./lib/prepare')
+const {parseURL} = require('./lib/parseURL')
 const decodeTypes = require('./lib/types')
 
 class Adapter {
@@ -56,6 +57,13 @@ class Adapter {
       setupLog(this.sockets)
   }
 
+  static fromURL(urlOrOptions, options) {
+    if (typeof urlOrOptions === 'object')
+      return new this(parseURL(urlOrOptions))
+    else
+      return new this(urlOrOptions, options)
+  }
+
   performQuery(mode, message, args) {
     return query(this, mode, sql2(message, args), new Error())
   }
@@ -85,4 +93,4 @@ class Adapter {
   }
 }
 
-module.exports = {Adapter, quote, sql}
+module.exports = {Adapter, quote, sql, parseURL}
