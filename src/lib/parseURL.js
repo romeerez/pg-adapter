@@ -5,7 +5,7 @@ exports.parseURL = (url = process.env.DATABASE_URL) => {
     throw new Error(`Database url ${url} does not seem to be postgres`)
 
   let [host, port] = dbUrl.host.split(':')
-  const [user, password] = dbUrl.auth.slice(':')
+  const [user, password] = dbUrl.auth.split(':')
   return {
     host: host,
     port: port || 5432,
