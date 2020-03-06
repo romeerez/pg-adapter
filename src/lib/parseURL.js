@@ -8,7 +8,7 @@ exports.parseURL = (url = process.env.DATABASE_URL) => {
   return {
     host: host,
     port: port || 5432,
-    database: dbUrl.path,
+    database: dbUrl.path.slice(1),
     user: dbUrl.auth.substr(0, dbUrl.auth.indexOf(':')),
     password: dbUrl.auth.substr(dbUrl.auth.indexOf(':') + 1, dbUrl.auth.length),
   }
