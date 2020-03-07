@@ -37,6 +37,7 @@ const db = new Adapter({
   password: '',
   pool: 10,
   log: true,
+  ssl: true // will detect automatically
 })
 ```
 

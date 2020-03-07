@@ -13,6 +13,7 @@ const rowDescriptionCode = 'T'.charCodeAt(0)
 const dataRowCode = 'D'.charCodeAt(0)
 const commandCompleteCode = 'C'.charCodeAt(0)
 const errorResponseCode = 'E'.charCodeAt(0)
+const noticeResponseCode = 'N'.charCodeAt(0)
 const bindCode = 'B'.charCodeAt(0)
 const parseCompleteCode = '1'.charCodeAt(0)
 const bindCompleteCode = '2'.charCodeAt(0)
@@ -26,7 +27,6 @@ const copyBothResponseCode = 'W'.charCodeAt(0)
 const functionCallResponseCode = 'V'.charCodeAt(0)
 const negotiateProtocolVersionCode = 'v'.charCodeAt(0)
 const noDataCode = 'n'.charCodeAt(0)
-const noticeResponseCode = 'N'.charCodeAt(0)
 const notificationResponseCode = 'A'.charCodeAt(0)
 const emptyQueryResponseCode = 'I'.charCodeAt(0)
 const parameterDescriptionCode = 't'.charCodeAt(0)
@@ -69,12 +69,12 @@ const handleMessage = (socket, data, size = data.length) => {
       parseDescription(socket, data, pos)
     } else if (code === readyForQueryCode) {
       return socket.finishTask()
-    } else if (code === errorResponseCode) {
+    } else if (code === errorResponseCode || code === noticeResponseCode) {
       const {level} = parseError(socket, data, pos)
       if (level !== 'ERROR')
         return socket.finishTask()
     } else if (code === authenticationCode) {
-      socket.error = auth(socket, data, pos)
+      auth(socket, data, pos)
     } else if (code === commandCompleteCode) {
       complete(socket)
     } else {

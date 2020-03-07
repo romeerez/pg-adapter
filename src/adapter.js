@@ -1,12 +1,8 @@
-const {Socket} = require('net')
-const {handleMessage} = require('./lib/messageHandler')
 const {connect} = require('./lib/connect')
 const {query} = require('./lib/query')
 const {objectsMode, arraysMode, valueMode, skipMode} = require('./lib/handlers/parseDescription')
 const {quote} = require('./lib/quote')
 const {sql, sql2} = require('./lib/sql')
-const {setupLog} = require('./lib/setupLog')
-const {finishTask} = require('./lib/finishTask')
 const {transaction} = require('./lib/transaction')
 const {sync} = require('./lib/sync')
 const {close} = require('./lib/close')
@@ -30,20 +26,10 @@ class Adapter {
     this.user = user
     this.password = password
     this.pool = pool
+    this.log = log
     this.sockets = new Array(pool)
     this.task = null
     this.decodeTypes = {...decodeTypes}
-    for (let i = 0; i < pool; i++) {
-      const socket = new Socket({readable: true, writable: true})
-      socket.on('data', handleMessage.bind(null, socket))
-      socket.buffer = Buffer.alloc(10000)
-      socket.adapter = this
-      socket.transaction = this
-      socket.finishTask = finishTask.bind(null, socket)
-      socket.query = socket.write.bind(socket)
-      socket.prepared = {}
-      this.sockets[i] = socket
-    }
     this.connected = false
     this.connect = connect.bind(null, this)
     this.close = close.bind(null, this)
@@ -52,9 +38,8 @@ class Adapter {
     this.sql = sql
     this.query = this.objects
     this.prepare = prepare
+    this.sockets = []
     this.transactions = []
-    if (log)
-      setupLog(this.sockets)
   }
 
   static fromURL(urlOrOptions, options) {
