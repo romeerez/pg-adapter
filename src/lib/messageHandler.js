@@ -72,7 +72,7 @@ const handleMessage = (socket, data, size = data.length) => {
     } else if (code === errorResponseCode) {
       const {level} = parseError(socket, data, pos)
       if (level !== 'ERROR')
-        break
+        return socket.finishTask()
     } else if (code === authenticationCode) {
       socket.error = auth(socket, data, pos)
     } else if (code === commandCompleteCode) {
