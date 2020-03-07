@@ -44,7 +44,7 @@ class Adapter {
 
   static fromURL(urlOrOptions, options) {
     if (typeof urlOrOptions === 'object')
-      return new this(parseURL(urlOrOptions))
+      return new this(parseURL(process.env.DATABASE_URL))
     else
       return new this(urlOrOptions, options)
   }
