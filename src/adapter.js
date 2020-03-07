@@ -46,7 +46,7 @@ class Adapter {
     if (typeof urlOrOptions === 'object')
       return new this(parseURL(process.env.DATABASE_URL))
     else
-      return new this(urlOrOptions, options)
+      return new this(parseURL(urlOrOptions), options)
   }
 
   performQuery(mode, message, args) {
