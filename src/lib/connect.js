@@ -65,15 +65,17 @@ module.exports = {
 
     const {pool, port, host, ssl} = adapter
     const sockets = new Array(pool)
+    adapter.sockets = sockets
+
     const error = new Error()
     const promises = new Array(pool)
     for (let i = 0; i < pool; i++) {
       let socket = new Socket({readable: true, writable: true})
+      sockets[i] = socket
       socket.task = {error: {}, resolve: noop, reject: noop}
       promises[i] = new Promise((resolve, reject) => {
         socket.connect(port, host, () => {
           if (ssl === false) {
-            sockets[i] = socket
             sendStartupMessage(adapter, socket, error, resolve, reject)
           } else {
             socket.write(checkSSLMessage)
@@ -91,7 +93,5 @@ module.exports = {
 
     if (adapter.log)
       setupLog(sockets)
-
-    adapter.sockets = sockets
   }
 }
