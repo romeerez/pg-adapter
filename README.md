@@ -26,7 +26,7 @@ npm install pg-adapter
 yarn add pg-adapter
 ```
 ```js
-const Adapter = require('pg-adapter')
+const { Adapter } = require('pg-adapter')
 
 // All these values are defaults
 const db = new Adapter({
