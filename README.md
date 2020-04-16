@@ -8,6 +8,8 @@ There is already `pg`, it's popular, has community.
 Well, this adapter may seem more convenient and faster in microbenchmarks
 (faster then pg-native too, for single connection and pool, bench: https://gitlab.com/snippets/1945002).
 
+It's written on Typescript so examples are also on it.
+
 ## Table of Contents
 * [Getting started](#getting-started)
 * [Making queries](#making-queries)
@@ -15,7 +17,7 @@ Well, this adapter may seem more convenient and faster in microbenchmarks
 * [Pool](#pool)
 * [Log](#log)
 * [Errors](#errors)
-* [Types](#types)
+* [Types](#database-types)
 * [Transactions](#transactions)
 * [Prepared statements](#prepared-statements)
 * [Sync](#sync)
@@ -25,8 +27,9 @@ Well, this adapter may seem more convenient and faster in microbenchmarks
 npm install pg-adapter
 yarn add pg-adapter
 ```
-```js
-const { Adapter } = require('pg-adapter')
+
+```typescript
+import { Adapter } from 'pg-adapter'
 
 // All these values are defaults
 const db = new Adapter({
@@ -37,7 +40,6 @@ const db = new Adapter({
   password: '',
   pool: 10,
   log: true,
-  ssl: true // will detect automatically
 })
 ```
 
@@ -104,17 +106,16 @@ db.query`SELECT * FROM table WHERE a = ${rawValue}`
 Better to use `sql` function, then the editor can highlight syntax:
 
 ```js
-const {sql} = require('pg-adapter')
+import {sql} from 'pg-adapter'
 
 const value = 'value'
 const safeSql = sql`SELECT * FROM table WHERE a = ${value}`
-db.sql`template ${'string'}` // adapter instance includes it
 ```
 
 For escaping single value there is `quote`:
 
 ```js
-const {quote} = require('pg-adapter')
+import {quote} from 'pg-adapter'
 
 const value = 'value'
 const safeSqlValue = quote(value)
@@ -128,6 +129,12 @@ it can be efficient.
 ```js
 const [a, b, c] = await db.value('SELECT 1; SELECT 2; SELECT 3')
 // a = 1, b = 2, c = 3
+```
+
+You can specify types for ts compiler to know:
+
+```typescript
+const [a, b, c] = <[number, number, number]>await db.value('SELECT 1; SELECT 2; SELECT 3')
 ```
 
 ## Pool
@@ -178,7 +185,7 @@ Log can be disabled via constructor property `log` from above.
 When error happens it's stacktrace points to place where you were making this query.
 Which is not true for `pg` adapter, so considered as feature.
 
-## Types
+## Database types
 
 By default numbers, booleans and dates are parsing from response.
 To add json parsing, for example:
@@ -201,8 +208,6 @@ Null from db won't get to parser.
 
 ## Transactions
 
-First syntax:
-
 ```js
 const t = db.transaction()
 
@@ -218,17 +223,17 @@ try {
 }
 ```
 
-Second syntax:
+It can receive callback:
 
 ```js
-const promise = db.transaction(async t => {
+const t = db.transaction(async t => {
   // try-catch is done in transaction function
   await t.exec('make several')
   await t.exec('queries')
   console.log('transaction failed')
   // commit automatically
 })
-promise.then(() => console.log('transaction complete'))
+t.promise.then(() => console.log('transaction complete'))
 ```
 
 ## Prepared statements
