@@ -3,5 +3,5 @@ node_modules
 yarn.lock
 .d.ts
 .js
-.test*
+test*
 .env
