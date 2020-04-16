@@ -1,0 +1,9 @@
+/// <reference types="node" />
+export declare const encodeInt32: (buf: Buffer, i: number, n: number) => void;
+export declare const decodeInt32: (data: Buffer, i: number) => number;
+export declare const decodeInt16: (data: Buffer, i: number) => number;
+export declare const getMessageLength: (data: Buffer, pos: number) => number;
+export declare const skipMessage: (data: Buffer, pos: number) => number;
+export declare const noop: () => void;
+export declare const throwError: (err: Error) => never;
+export declare const getMessage: (data: Buffer, pos?: number, offset?: number) => Buffer;

@@ -1,93 +1,111 @@
-const {skipMessage, getMessageLength} = require('./utils')
-const {parseDescription} = require('./handlers/parseDescription')
-const {parseRow} = require('./handlers/parseRow')
-const {parseError} = require('./handlers/error')
-const {auth} = require('./handlers/auth')
-const {complete} = require('./handlers/complete')
-
-const authenticationCode = 'R'.charCodeAt(0)
-const backendKeyDataCode = 'K'.charCodeAt(0)
-const parameterStatusCode = 'S'.charCodeAt(0)
-const readyForQueryCode = 'Z'.charCodeAt(0)
-const rowDescriptionCode = 'T'.charCodeAt(0)
-const dataRowCode = 'D'.charCodeAt(0)
-const commandCompleteCode = 'C'.charCodeAt(0)
-const errorResponseCode = 'E'.charCodeAt(0)
-const noticeResponseCode = 'N'.charCodeAt(0)
-const bindCode = 'B'.charCodeAt(0)
-const parseCompleteCode = '1'.charCodeAt(0)
-const bindCompleteCode = '2'.charCodeAt(0)
-const closeCompleteCode = '3'.charCodeAt(0)
-const copyDataCode = 'd'.charCodeAt(0)
-const copyDoneCode = 'c'.charCodeAt(0)
-const copyFailCode = 'f'.charCodeAt(0)
-const copyInResponseCode = 'G'.charCodeAt(0)
-const copyOutResponseCode = 'H'.charCodeAt(0)
-const copyBothResponseCode = 'W'.charCodeAt(0)
-const functionCallResponseCode = 'V'.charCodeAt(0)
-const negotiateProtocolVersionCode = 'v'.charCodeAt(0)
-const noDataCode = 'n'.charCodeAt(0)
-const notificationResponseCode = 'A'.charCodeAt(0)
-const emptyQueryResponseCode = 'I'.charCodeAt(0)
-const parameterDescriptionCode = 't'.charCodeAt(0)
-const portalSuspendedCode = 's'.charCodeAt(0)
-
-const copy = (socket, data, dataPos) =>
-  data.copy(socket.buffer, socket.cutMessageAllocated, dataPos)
-
-const handleMessage = (socket, data, size = data.length) => {
-  let pos = 0
-  let len = socket.cutMessageLength
-  if (len !== 0) {
-    if (len > socket.cutMessageAllocated + data.length) {
-      copy(socket, data, 0)
-      socket.cutMessageAllocated += data.length
-      return
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const buffer_1 = require("lib/buffer");
+const auth_1 = require("lib/handlers/auth");
+const complete_1 = require("lib/handlers/complete");
+const error_1 = require("lib/handlers/error");
+const parseDescription_1 = require("lib/handlers/parseDescription");
+const parseRow_1 = require("lib/handlers/parseRow");
+var codes;
+(function (codes) {
+    codes[codes["authenticationCode"] = 'R'.charCodeAt(0)] = "authenticationCode";
+    codes[codes["backendKeyDataCode"] = 'K'.charCodeAt(0)] = "backendKeyDataCode";
+    codes[codes["parameterStatusCode"] = 'S'.charCodeAt(0)] = "parameterStatusCode";
+    codes[codes["readyForQueryCode"] = 'Z'.charCodeAt(0)] = "readyForQueryCode";
+    codes[codes["rowDescriptionCode"] = 'T'.charCodeAt(0)] = "rowDescriptionCode";
+    codes[codes["dataRowCode"] = 'D'.charCodeAt(0)] = "dataRowCode";
+    codes[codes["commandCompleteCode"] = 'C'.charCodeAt(0)] = "commandCompleteCode";
+    codes[codes["errorResponseCode"] = 'E'.charCodeAt(0)] = "errorResponseCode";
+    codes[codes["noticeResponseCode"] = 'N'.charCodeAt(0)] = "noticeResponseCode";
+    codes[codes["bindCode"] = 'B'.charCodeAt(0)] = "bindCode";
+    codes[codes["parseCompleteCode"] = '1'.charCodeAt(0)] = "parseCompleteCode";
+    codes[codes["bindCompleteCode"] = '2'.charCodeAt(0)] = "bindCompleteCode";
+    codes[codes["closeCompleteCode"] = '3'.charCodeAt(0)] = "closeCompleteCode";
+    codes[codes["copyDataCode"] = 'd'.charCodeAt(0)] = "copyDataCode";
+    codes[codes["copyDoneCode"] = 'c'.charCodeAt(0)] = "copyDoneCode";
+    codes[codes["copyFailCode"] = 'f'.charCodeAt(0)] = "copyFailCode";
+    codes[codes["copyInResponseCode"] = 'G'.charCodeAt(0)] = "copyInResponseCode";
+    codes[codes["copyOutResponseCode"] = 'H'.charCodeAt(0)] = "copyOutResponseCode";
+    codes[codes["copyBothResponseCode"] = 'W'.charCodeAt(0)] = "copyBothResponseCode";
+    codes[codes["functionCallResponseCode"] = 'V'.charCodeAt(0)] = "functionCallResponseCode";
+    codes[codes["negotiateProtocolVersionCode"] = 'v'.charCodeAt(0)] = "negotiateProtocolVersionCode";
+    codes[codes["noDataCode"] = 'n'.charCodeAt(0)] = "noDataCode";
+    codes[codes["notificationResponseCode"] = 'A'.charCodeAt(0)] = "notificationResponseCode";
+    codes[codes["emptyQueryResponseCode"] = 'I'.charCodeAt(0)] = "emptyQueryResponseCode";
+    codes[codes["parameterDescriptionCode"] = 't'.charCodeAt(0)] = "parameterDescriptionCode";
+    codes[codes["portalSuspendedCode"] = 's'.charCodeAt(0)] = "portalSuspendedCode";
+})(codes || (codes = {}));
+const copy = (message, data, dataPos) => data.copy(message.buffer, message.cutMessageAllocated, dataPos);
+const listener = (socket, message, creds, data, size = data.length) => {
+    let pos = 0;
+    let len = message.cutMessageLength;
+    if (len !== 0) {
+        if (len > message.cutMessageAllocated + data.length) {
+            copy(message, data, 0);
+            message.cutMessageAllocated += data.length;
+            return;
+        }
+        const copySize = len - message.cutMessageAllocated;
+        copy(message, data, 0);
+        message.cutMessageLength = 0;
+        message.cutMessageAllocated = 0;
+        listener(socket, message, creds, message.buffer, len);
+        pos = copySize + 1;
     }
-
-    const copySize = len - socket.cutMessageAllocated
-    copy(socket, data, 0)
-    socket.cutMessageLength = 0
-    socket.cutMessageAllocated = 0
-    handleMessage(socket, socket.buffer, len)
-    pos = copySize + 1
-  }
-  len = getMessageLength(data, pos)
-  while (pos < size) {
-    if (pos + len > size) {
-      if (socket.buffer.length < len)
-        socket.buffer = Buffer.alloc(len + 1, socket.buffer)
-      copy(socket, data, pos)
-      socket.cutMessageAllocated = size - pos
-      socket.cutMessageLength = len
-      break
+    len = buffer_1.getMessageLength(data, pos);
+    const task = socket.task;
+    while (pos < size) {
+        if (pos + len > size) {
+            if (message.buffer.length < len)
+                message.buffer = Buffer.alloc(len + 1, message.buffer);
+            copy(message, data, pos);
+            message.cutMessageAllocated = size - pos;
+            message.cutMessageLength = len;
+            break;
+        }
+        const code = data[pos];
+        if (code === codes.dataRowCode) {
+            parseRow_1.parseRow(socket, task, data, pos);
+        }
+        else if (code === codes.rowDescriptionCode) {
+            parseDescription_1.parseDescription(socket, task, data, pos);
+        }
+        else if (code === codes.readyForQueryCode) {
+            return task.finish(socket, task);
+        }
+        else if (code === codes.errorResponseCode || code === codes.noticeResponseCode) {
+            const { level } = error_1.parseError(task, data, pos);
+            if (level !== 'ERROR')
+                return task.finish(socket, task);
+        }
+        else if (code === codes.authenticationCode) {
+            auth_1.auth(socket, task, creds, data, pos);
+        }
+        else if (code === codes.commandCompleteCode) {
+            complete_1.complete(task);
+        }
+        else {
+            if (code !== codes.parameterStatusCode &&
+                code !== codes.backendKeyDataCode) {
+                console.warn(`Handling of ${String.fromCharCode(code)} code is not implemented yet`);
+            }
+        }
+        pos = buffer_1.skipMessage(data, pos);
+        len = buffer_1.getMessageLength(data, pos);
     }
-    const code = data[pos]
-    if (code === dataRowCode) {
-      parseRow(socket, data, pos)
-    } else if (code === rowDescriptionCode) {
-      parseDescription(socket, data, pos)
-    } else if (code === readyForQueryCode) {
-      return socket.finishTask()
-    } else if (code === errorResponseCode || code === noticeResponseCode) {
-      const {level} = parseError(socket, data, pos)
-      if (level !== 'ERROR')
-        return socket.finishTask()
-    } else if (code === authenticationCode) {
-      auth(socket, data, pos)
-    } else if (code === commandCompleteCode) {
-      complete(socket)
-    } else {
-      if (
-        code !== parameterStatusCode &&
-        code !== backendKeyDataCode
-      ) {
-        console.warn(`Handling of ${String.fromCharCode(code)} code is not implemented yet`)
-      }
+};
+exports.handleMessage = (socket, creds) => {
+    const message = {
+        buffer: Buffer.alloc(10000),
+        cutMessageLength: 0,
+        cutMessageAllocated: 0,
+    };
+    socket.dataListener = (data) => listener(socket, message, creds, data);
+    socket.on('data', socket.dataListener);
+};
+exports.removeListener = (socket) => {
+    if (socket.dataListener) {
+        socket.removeListener('data', socket.dataListener);
+        delete socket.dataListener;
     }
-    pos = skipMessage(data, pos)
-    len = getMessageLength(data, pos)
-  }
-}
-
-exports.handleMessage = handleMessage
+};

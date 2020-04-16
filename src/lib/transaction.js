@@ -1,91 +1,101 @@
-const {query} = require('./query')
-const {skipMode} = require('./handlers/parseDescription')
-const {sql2} = require('./sql')
-
-const close = (transaction) => {
-  const transactions = transaction.adapter.transactions
-  transactions.splice(transactions.indexOf(transaction), 1)
-}
-
-const closedError = () =>
-  Promise.reject('transaction is closed')
-
-const finish = async (transaction, command) => {
-  transaction.performQuery = closedError
-
-  const promise = query(
-    transaction, skipMode, command, new Error(), {
-      closeTransaction: true
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const adapterBase_1 = require("lib/adapterBase");
+const task_1 = require("lib/task");
+const types_1 = require("types");
+const buffer_1 = require("lib/buffer");
+var queries;
+(function (queries) {
+    queries["begin"] = "BEGIN";
+    queries["commit"] = "COMMIT";
+    queries["rollback"] = "ROLLBACK";
+})(queries || (queries = {}));
+const applyFn = async (t, fn) => {
+    await fn(t);
+    t.commit();
+};
+exports.transaction = (adapter, error, fn) => {
+    const t = new Transaction(adapter, error).start();
+    if (fn)
+        applyFn(t, fn);
+    return t;
+};
+class Transaction extends adapterBase_1.AdapterBase {
+    constructor(adapter, error) {
+        super({ pool: 0, decodeTypes: adapter.decodeTypes, log: adapter.log });
+        this.afterBegin = (socket, task) => {
+            const { adapter } = task;
+            adapter.log.finish(socket, task);
+            const index = adapter.sockets.indexOf(socket);
+            adapter.sockets.splice(index, 1);
+            this.sockets[0] = socket;
+            if (adapter.lastTask === task)
+                adapter.lastTask = undefined;
+            socket.task = undefined;
+            task_1.next(this, socket);
+        };
+        this.finish = (socket, task) => {
+            const transaction = task.adapter;
+            transaction.log.finish(socket, task);
+            task.failed ? task.reject(task.error) : task.resolve();
+            transaction.sockets.length = 0;
+            transaction.task = task.next;
+            transaction.adapter.sockets.push(socket);
+            if (transaction.adapter.lastTask === task)
+                transaction.adapter.lastTask = undefined;
+            socket.task = undefined;
+            task_1.next(transaction.adapter, socket);
+        };
+        this.adapter = adapter;
+        this.error = error;
+        this.resolve = buffer_1.noop;
+        this.reject = buffer_1.noop;
+        this.promise = new Promise((resolve, reject) => {
+            this.resolve = resolve;
+            this.reject = reject;
+        });
     }
-  )
-
-  promise.then(transaction.resolve, transaction.reject)
-
-  try { await promise } catch (err) {}
-
-  close(transaction)
+    start() {
+        this.adapter.connect();
+        const task = task_1.createTask({
+            adapter: this.adapter,
+            error: this.error,
+            resolve: buffer_1.noop,
+            reject: buffer_1.noop,
+            decodeTypes: this.adapter.decodeTypes,
+            mode: types_1.ResultMode.skip,
+            query: queries.begin,
+            finish: this.afterBegin,
+        });
+        task_1.addTaskToAdapter(this.adapter, task);
+        return this;
+    }
+    transaction() {
+        const error = new Error();
+        return exports.transaction(this, error);
+    }
+    commit() {
+        return this.end(queries.commit);
+    }
+    rollback() {
+        return this.end(queries.rollback);
+    }
+    end(query = queries.commit) {
+        const task = task_1.createTask({
+            query,
+            adapter: this,
+            error: this.error,
+            resolve: this.resolve,
+            reject: this.reject,
+            finish: this.finish,
+            decodeTypes: this.adapter.decodeTypes,
+            mode: types_1.ResultMode.skip,
+        });
+        task_1.addTaskToAdapter(this, task);
+        return this;
+    }
+    then(...args) {
+        this.promise.then(...args);
+    }
 }
-
-const commit = (transaction) => finish(transaction, 'COMMIT')
-const rollback = (transaction) => finish(transaction, 'ROLLBACK')
-
-const performQuery = (transaction, mode, message, ...args) => {
-  if (transaction.error)
-    return Promise.reject(transaction.error)
-  return new Promise((resolve, reject) => {
-    query(transaction, mode, sql2(message, args), new Error(), {
-      resolve,
-      reject: (err) => {
-        reject(err)
-        if (transaction.error)
-          return
-
-        transaction.error = err
-        let {task} = transaction
-        while (task) {
-          task.reject(err)
-          task = task.next
-        }
-        transaction.task = null
-        transaction.rollback()
-      }
-    })
-  })
-}
-
-exports.transaction = (adapter, parentTransaction, fn) => {
-  const transaction = Object.create(parentTransaction)
-  transaction.task = null
-  transaction.connected = true
-  transaction.adapter = adapter
-  transaction.parentTransaction = parentTransaction
-  transaction.commit = commit.bind(null, transaction)
-  transaction.rollback = rollback.bind(null, transaction)
-  transaction.performQuery = performQuery.bind(null, transaction)
-
-  adapter.transactions.push(transaction)
-
-  query(parentTransaction, skipMode, 'BEGIN', new Error(), {
-    startTransaction: transaction
-  })
-
-  const promise = new Promise((resolve, reject) => {
-    transaction.resolve = resolve
-    transaction.reject = reject
-  })
-
-  if (fn) {
-    const fnPromise = new Promise(async (resolve, reject) => {
-      try {
-        await fn(transaction)
-        resolve()
-      } catch (err) {
-        reject(err)
-      }
-    })
-    return Promise.all([promise, fnPromise])
-  } else {
-    transaction.promise = promise
-    return transaction
-  }
-}
+exports.Transaction = Transaction;

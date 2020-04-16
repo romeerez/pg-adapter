@@ -1,46 +1,39 @@
-const {decodeInt32, decodeInt16} = require('../utils')
-
-const objectsMode = 0
-const arraysMode = 1
-const valueMode = 2
-const skipMode = 3
-
-module.exports = {
-  objectsMode, arraysMode, valueMode, skipMode,
-  parseDescription: (socket, data, pos) => {
-    const {task} = socket
-    let result, mode = task.parseResultMode
-    if (mode === skipMode)
-      result = null
-    else {
-      const columnsCount = decodeInt16(data, pos + 5)
-      if (mode === valueMode) {
-        const to = data.indexOf('\0', pos + 7)
-        socket.type = decodeInt32(data, to + 7)
-        result = null
-      } else {
-        pos += 7
-        const names = new Array(columnsCount)
-        const types = new Uint32Array(columnsCount)
-        for (let c = 0; c < columnsCount; c++) {
-          const to = data.indexOf('\0', pos)
-          names[c] = String(data.slice(pos, to))
-          pos = to + 7
-          types[c] = decodeInt32(data, pos)
-          pos += 12
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const buffer_1 = require("lib/buffer");
+const types_1 = require("types");
+exports.parseDescription = (socket, request, data, pos) => {
+    let result;
+    const mode = request.mode;
+    const { parseInfo } = request;
+    if (mode !== types_1.ResultMode.skip) {
+        const columnsCount = buffer_1.decodeInt16(data, pos + 5);
+        if (mode === types_1.ResultMode.value) {
+            const to = data.indexOf('\0', pos + 7);
+            parseInfo.type = buffer_1.decodeInt32(data, to + 7);
         }
-        socket.names = names
-        socket.types = types
-        result = []
-      }
-      socket.columnsCount = columnsCount
+        else {
+            pos += 7;
+            const names = new Array(columnsCount);
+            const types = new Uint32Array(columnsCount);
+            for (let c = 0; c < columnsCount; c++) {
+                const to = data.indexOf('\0', pos);
+                names[c] = String(data.slice(pos, to));
+                pos = to + 7;
+                types[c] = buffer_1.decodeInt32(data, pos);
+                pos += 12;
+            }
+            parseInfo.names = names;
+            parseInfo.types = types;
+            result = [];
+        }
+        parseInfo.columnsCount = columnsCount;
     }
-    if (socket.resultNum === 0)
-      socket.result = result
-    else if (socket.resultNum === 1)
-      socket.result = [socket.result, result]
+    const { resultNumber } = parseInfo;
+    if (resultNumber === 0)
+        request.result = result;
+    else if (resultNumber === 1)
+        request.result = [request.result, result];
     else
-      socket.result[socket.resultNum] = result
-    socket.parseResultMode = socket.task.parseResultMode
-  }
-}
+        request.result[resultNumber] = result;
+};

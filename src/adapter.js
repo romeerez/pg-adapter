@@ -1,81 +1,53 @@
-const {connect} = require('./lib/connect')
-const {query} = require('./lib/query')
-const {objectsMode, arraysMode, valueMode, skipMode} = require('./lib/handlers/parseDescription')
-const {quote} = require('./lib/quote')
-const {sql, sql2} = require('./lib/sql')
-const {transaction} = require('./lib/transaction')
-const {sync} = require('./lib/sync')
-const {close} = require('./lib/close')
-const {prepare} = require('./lib/prepare')
-const {parseURL} = require('./lib/parseURL')
-const decodeTypes = require('./lib/types')
-
-class Adapter {
-  constructor({
-    host = '127.0.0.1',
-    port = 5432,
-    database = 'postgres',
-    user = process.env.USER || 'postgres',
-    password = '',
-    pool = 10,
-    log = true
-  } = {}) {
-    this.host = host
-    this.port = port
-    this.database = database
-    this.user = user
-    this.password = password
-    this.pool = pool
-    this.log = log
-    this.sockets = new Array(pool)
-    this.task = null
-    this.decodeTypes = {...decodeTypes}
-    this.connected = false
-    this.connect = connect.bind(null, this)
-    this.close = close.bind(null, this)
-    this.adapter = this
-    this.quote = quote
-    this.sql = sql
-    this.query = this.objects
-    this.prepare = prepare
-    this.sockets = []
-    this.transactions = []
-  }
-
-  static fromURL(urlOrOptions, options) {
-    if (typeof urlOrOptions === 'object')
-      return new this(parseURL(process.env.DATABASE_URL))
-    else
-      return new this(parseURL(urlOrOptions), options)
-  }
-
-  performQuery(mode, message, args) {
-    return query(this, mode, sql2(message, args), new Error())
-  }
-
-  objects(sql, ...args) {
-    return this.performQuery(objectsMode, sql, args)
-  }
-
-  arrays(sql, ...args) {
-    return this.performQuery(arraysMode, sql, args)
-  }
-
-  value(sql, ...args) {
-    return this.performQuery(valueMode, sql, args)
-  }
-
-  exec(sql, ...args) {
-    return this.performQuery(skipMode, sql, args)
-  }
-
-  sync() {
-    return sync(this)
-  }
-
-  transaction(fn) {
-    return transaction(this.adapter, this, fn)
-  }
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const parseUrl_1 = require("lib/parseUrl");
+const connect_1 = require("lib/connect");
+const sync_1 = require("lib/sync");
+const close_1 = require("lib/close");
+const defaultDecodeTypes_1 = require("lib/defaultDecodeTypes");
+const adapterBase_1 = require("lib/adapterBase");
+const transaction_1 = require("lib/transaction");
+const log_1 = require("lib/log");
+const prepare_1 = require("lib/prepare");
+var quote_1 = require("lib/quote");
+exports.quote = quote_1.quote;
+var sql_1 = require("lib/sql");
+exports.sql = sql_1.sql;
+var parseUrl_2 = require("lib/parseUrl");
+exports.parseUrl = parseUrl_2.parseUrl;
+class Adapter extends adapterBase_1.AdapterBase {
+    constructor({ host = '127.0.0.1', port = 5432, database = 'postgres', user = process.env.USER || 'postgres', password = '', pool = 10, log = Adapter.defaultLog, decodeTypes, } = {}) {
+        super({ pool, decodeTypes: decodeTypes || defaultDecodeTypes_1.defaultDecodeTypes, log });
+        this.connected = false;
+        this.sync = () => sync_1.sync(this);
+        this.close = () => close_1.close(this);
+        this.connectionSettings = {
+            host, port, database, user, password
+        };
+        this.pool = pool;
+    }
+    static fromURL(urlOrOptions, options) {
+        if (typeof urlOrOptions === 'object')
+            return new this({ ...parseUrl_1.parseUrl(process.env.DATABASE_URL), ...urlOrOptions });
+        else
+            return new this({ ...parseUrl_1.parseUrl(urlOrOptions), ...options });
+    }
+    async connect() {
+        if (this.connected)
+            return;
+        this.connected = true;
+        const promises = [];
+        for (let i = 0; i < this.pool; i++)
+            promises.push(connect_1.connect(this, this.sockets[i], this.connectionSettings));
+        this.sockets = await Promise.all(promises);
+    }
+    transaction(fn) {
+        const error = new Error();
+        return transaction_1.transaction(this, error, fn);
+    }
+    prepare(name, ...args) {
+        return prepare_1.prepare(this, name, ...args);
+    }
 }
-
-module.exports = {Adapter, quote, sql, parseURL}
+exports.Adapter = Adapter;
+Adapter.defaultLog = log_1.defaultLog;
