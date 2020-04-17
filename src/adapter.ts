@@ -12,6 +12,8 @@ import {prepare} from './lib/prepare'
 export {quote} from './lib/quote'
 export {sql} from './lib/sql'
 export {parseUrl} from './lib/parseUrl'
+export {Transaction}
+export {AdapterBase}
 
 export class Adapter extends AdapterBase {
   static defaultLog: boolean | Log = defaultLog
