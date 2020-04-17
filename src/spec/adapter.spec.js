@@ -124,7 +124,8 @@ describe('Adapter', () => {
             const rows = await db.performQuery(types_1.ResultMode.arrays, `SELECT ${values.map(value => value.sql)}`);
             const row = rows[0];
             row.forEach((item, i) => {
-                if ((item === null || item === void 0 ? void 0 : item.constructor) === Date)
+                var _a;
+                if (((_a = item) === null || _a === void 0 ? void 0 : _a.constructor) === Date)
                     row[i] = +row[i];
             });
             expect(row).toEqual(values.map(value => value.value));
