@@ -14,6 +14,7 @@ export {sql} from './lib/sql'
 export {parseUrl} from './lib/parseUrl'
 export {Transaction}
 export {AdapterBase}
+export {AdapterProps}
 
 export class Adapter extends AdapterBase {
   static defaultLog: boolean | Log = defaultLog

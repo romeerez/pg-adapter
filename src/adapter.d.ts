@@ -6,6 +6,7 @@ export { sql } from './lib/sql';
 export { parseUrl } from './lib/parseUrl';
 export { Transaction };
 export { AdapterBase };
+export { AdapterProps };
 export declare class Adapter extends AdapterBase {
     static defaultLog: boolean | Log;
     connectionSettings: ConnectionSettingType;
