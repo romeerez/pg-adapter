@@ -1,4 +1,4 @@
-const trueCode = 't'.charCodeAt(0)
+const trueCode = 'T'.charCodeAt(0)
 
 const toInt = (value: Buffer, pos: number, size: number) =>
   parseInt(value.toString(undefined, pos, pos + size))

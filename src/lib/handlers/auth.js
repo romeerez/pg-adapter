@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const crypto_1 = __importDefault(require("crypto"));
-const buffer_1 = require("lib/buffer");
+const buffer_1 = require("../buffer");
 var codes;
 (function (codes) {
     codes[codes["success"] = 0] = "success";

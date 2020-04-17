@@ -1,10 +1,10 @@
-import {Task, Creds, Socket} from 'types'
-import {getMessageLength, skipMessage} from 'lib/buffer'
-import {auth} from 'lib/handlers/auth'
-import {complete} from 'lib/handlers/complete'
-import {parseError} from 'lib/handlers/error'
-import {parseDescription} from 'lib/handlers/parseDescription'
-import {parseRow} from 'lib/handlers/parseRow'
+import {Task, Creds, Socket} from '../types'
+import {getMessageLength, skipMessage} from './buffer'
+import {auth} from './handlers/auth'
+import {complete} from './handlers/complete'
+import {parseError} from './handlers/error'
+import {parseDescription} from './handlers/parseDescription'
+import {parseRow} from './handlers/parseRow'
 
 interface Message {
   buffer: Buffer,

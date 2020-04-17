@@ -1,10 +1,10 @@
 import {isIP} from 'net'
 import tls from 'tls'
-import {Socket, ConnectionSettingType, PgError, ResultMode, Task} from 'types'
-import {encodeInt32} from 'lib/buffer'
-import {handleMessage} from 'lib/messageHandler'
-import {createTask, next} from 'lib/task'
-import {Adapter} from 'adapter'
+import {Socket, ConnectionSettingType, PgError, ResultMode, Task} from '../types'
+import {encodeInt32} from './buffer'
+import {handleMessage} from './messageHandler'
+import {createTask, next} from './task'
+import {Adapter} from '../adapter'
 
 const checkSSLMessage = Buffer.alloc(8)
 encodeInt32(checkSSLMessage, 0, 8)

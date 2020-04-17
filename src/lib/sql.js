@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const quote_1 = require("lib/quote");
+const quote_1 = require("./quote");
 const process = (parts, args) => {
     if (typeof parts === 'string')
         return parts;

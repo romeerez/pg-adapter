@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { Socket } from 'net';
-import { Creds, Task } from 'types';
+import { Creds, Task } from '../../types';
 export declare enum codes {
     success = 0,
     kerberosV5 = 2,

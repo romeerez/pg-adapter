@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const buffer_1 = require("lib/buffer");
-const types_1 = require("types");
+const buffer_1 = require("../buffer");
+const types_1 = require("../../types");
 exports.parseDescription = (socket, request, data, pos) => {
     let result;
     const mode = request.mode;

@@ -1,5 +1,5 @@
-import { AdapterBase } from 'lib/adapterBase';
-import { DecodeTypes, PgError, ResultMode, Task, Socket, Log } from 'types';
+import { AdapterBase } from './adapterBase';
+import { DecodeTypes, PgError, ResultMode, Task, Socket, Log } from '../types';
 declare type RequiredParams = {
     adapter: AdapterBase;
     mode: ResultMode;

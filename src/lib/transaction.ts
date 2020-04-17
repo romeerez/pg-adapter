@@ -1,7 +1,7 @@
-import {AdapterBase} from 'lib/adapterBase'
-import {createTask, addTaskToAdapter, next} from 'lib/task'
-import {Socket, Task, ResultMode, PgError} from 'types'
-import {noop} from 'lib/buffer'
+import {AdapterBase} from './adapterBase'
+import {createTask, addTaskToAdapter, next} from './task'
+import {Socket, Task, ResultMode, PgError} from '../types'
+import {noop} from './buffer'
 
 enum queries {
   begin = 'BEGIN',

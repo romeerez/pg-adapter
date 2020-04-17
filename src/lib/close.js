@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const messageHandler_1 = require("lib/messageHandler");
+const messageHandler_1 = require("./messageHandler");
 exports.close = async (adapter) => {
     await adapter.sync();
     adapter.connected = false;

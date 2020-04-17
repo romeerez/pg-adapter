@@ -1,7 +1,7 @@
-import {AdapterBase} from 'lib/adapterBase'
+import {AdapterBase} from './adapterBase'
 import {ResultMode, Prepared} from '../types'
-import {sql2} from 'lib/sql'
-import {quote} from 'lib/quote'
+import {sql2} from './sql'
+import {quote} from './quote'
 
 export const prepare = (adapter: AdapterBase, name: string, ...args: any[]) => {
   return (prepareTemplate: TemplateStringsArray, prepareArgs?: any[]) => {

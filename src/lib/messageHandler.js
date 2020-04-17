@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const buffer_1 = require("lib/buffer");
-const auth_1 = require("lib/handlers/auth");
-const complete_1 = require("lib/handlers/complete");
-const error_1 = require("lib/handlers/error");
-const parseDescription_1 = require("lib/handlers/parseDescription");
-const parseRow_1 = require("lib/handlers/parseRow");
+const buffer_1 = require("./buffer");
+const auth_1 = require("./handlers/auth");
+const complete_1 = require("./handlers/complete");
+const error_1 = require("./handlers/error");
+const parseDescription_1 = require("./handlers/parseDescription");
+const parseRow_1 = require("./handlers/parseRow");
 var codes;
 (function (codes) {
     codes[codes["authenticationCode"] = 'R'.charCodeAt(0)] = "authenticationCode";

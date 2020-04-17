@@ -1,4 +1,4 @@
-import {quote} from 'lib/quote'
+import {quote} from './quote'
 
 const process = (parts: string | TemplateStringsArray, args: any[]) => {
   if (typeof parts === 'string')

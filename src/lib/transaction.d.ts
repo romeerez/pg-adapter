@@ -1,5 +1,5 @@
-import { AdapterBase } from 'lib/adapterBase';
-import { Socket, Task, PgError } from 'types';
+import { AdapterBase } from './adapterBase';
+import { Socket, Task, PgError } from '../types';
 export declare const transaction: (adapter: AdapterBase, error: PgError, fn?: ((t: Transaction) => any) | undefined) => Transaction;
 export declare class Transaction extends AdapterBase {
     adapter: AdapterBase;

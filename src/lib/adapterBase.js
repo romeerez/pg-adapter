@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const net_1 = require("net");
-const types_1 = require("types");
-const task_1 = require("lib/task");
-const sql_1 = require("lib/sql");
-const log_1 = require("lib/log");
+const types_1 = require("../types");
+const task_1 = require("./task");
+const sql_1 = require("./sql");
+const log_1 = require("./log");
 class AdapterBase {
     constructor({ pool, decodeTypes, log }) {
         this.performQuery = (mode, query, args, prepared) => {

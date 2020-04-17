@@ -1,6 +1,6 @@
-import {AdapterBase} from 'lib/adapterBase'
-import {DecodeTypes, PgError, ResultMode, Task, Socket, Log, Prepared} from 'types'
-import {encodeInt32} from 'lib/buffer'
+import {AdapterBase} from './adapterBase'
+import {DecodeTypes, PgError, ResultMode, Task, Socket, Log, Prepared} from '../types'
+import {encodeInt32} from './buffer'
 
 type RequiredParams = {
   adapter: AdapterBase,

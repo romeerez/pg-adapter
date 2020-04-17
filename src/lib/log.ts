@@ -1,4 +1,4 @@
-import {Log} from 'types'
+import {Log} from '../types'
 import chalk from 'chalk'
 
 export const defaultLog: Log = {

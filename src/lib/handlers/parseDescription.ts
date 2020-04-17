@@ -1,6 +1,6 @@
 import {Socket} from 'net'
-import {decodeInt32, decodeInt16} from 'lib/buffer'
-import {Task, ResultMode} from 'types'
+import {decodeInt32, decodeInt16} from '../buffer'
+import {Task, ResultMode} from '../../types'
 
 export const parseDescription = (socket: Socket, request: Task, data: Buffer, pos: number) => {
   let result

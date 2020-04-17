@@ -1,7 +1,7 @@
 import {Socket} from 'net'
 import crypto from 'crypto'
-import {decodeInt32, encodeInt32, getMessage} from 'lib/buffer'
-import {Creds, Task} from 'types'
+import {decodeInt32, encodeInt32, getMessage} from '../buffer'
+import {Creds, Task} from '../../types'
 
 export enum codes {
   success = 0,

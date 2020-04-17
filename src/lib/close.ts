@@ -1,5 +1,5 @@
-import {Adapter} from 'adapter'
-import {removeListener} from 'lib/messageHandler'
+import {Adapter} from '../adapter'
+import {removeListener} from './messageHandler'
 
 export const close = async (adapter: Adapter) => {
   await adapter.sync()

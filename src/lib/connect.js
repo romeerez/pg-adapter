@@ -5,10 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const net_1 = require("net");
 const tls_1 = __importDefault(require("tls"));
-const types_1 = require("types");
-const buffer_1 = require("lib/buffer");
-const messageHandler_1 = require("lib/messageHandler");
-const task_1 = require("lib/task");
+const types_1 = require("../types");
+const buffer_1 = require("./buffer");
+const messageHandler_1 = require("./messageHandler");
+const task_1 = require("./task");
 const checkSSLMessage = Buffer.alloc(8);
 buffer_1.encodeInt32(checkSSLMessage, 0, 8);
 buffer_1.encodeInt32(checkSSLMessage, 4, 80877103);

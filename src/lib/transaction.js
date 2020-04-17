@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const adapterBase_1 = require("lib/adapterBase");
-const task_1 = require("lib/task");
-const types_1 = require("types");
-const buffer_1 = require("lib/buffer");
+const adapterBase_1 = require("./adapterBase");
+const task_1 = require("./task");
+const types_1 = require("../types");
+const buffer_1 = require("./buffer");
 var queries;
 (function (queries) {
     queries["begin"] = "BEGIN";

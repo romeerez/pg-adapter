@@ -1,4 +1,4 @@
-import {Task, Socket} from 'types'
+import {Task, Socket} from '../types'
 
 export const sync = ({lastTask: last}: {lastTask?: Task}) => {
   if (!last)

@@ -1,4 +1,4 @@
-import { DecodeTypes, ResultMode, Log, Task, Socket, Prepared } from 'types';
+import { DecodeTypes, ResultMode, Log, Task, Socket, Prepared } from '../types';
 export declare class AdapterBase {
     sockets: Socket[];
     decodeTypes: DecodeTypes;

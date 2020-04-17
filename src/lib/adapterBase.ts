@@ -1,8 +1,8 @@
 import {Socket as NativeSocket} from 'net'
-import {DecodeTypes, PgError, ResultMode, Log, Task, Socket, Prepared} from 'types'
-import {addTaskToAdapter, createTask} from 'lib/task'
-import {sql2} from 'lib/sql'
-import {defaultLog, noopLog} from 'lib/log'
+import {DecodeTypes, PgError, ResultMode, Log, Task, Socket, Prepared} from '../types'
+import {addTaskToAdapter, createTask} from './task'
+import {sql2} from './sql'
+import {defaultLog, noopLog} from './log'
 
 export class AdapterBase {
   sockets: Socket[]

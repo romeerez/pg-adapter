@@ -1,6 +1,6 @@
 import {Socket} from 'net'
-import {decodeInt32} from 'lib/buffer'
-import {DecodeTypes, ResultMode, Task} from 'types'
+import {decodeInt32} from '../buffer'
+import {DecodeTypes, ResultMode, Task} from '../../types'
 
 export const parseRow = (socket: Socket, task: Task, data: Buffer, pos: number) => {
   const {mode, parseInfo} = task

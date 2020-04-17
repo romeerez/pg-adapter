@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const buffer_1 = require("lib/buffer");
-const types_1 = require("types");
+const buffer_1 = require("../buffer");
+const types_1 = require("../../types");
 exports.parseRow = (socket, task, data, pos) => {
     const { mode, parseInfo } = task;
     if (mode === types_1.ResultMode.skip || parseInfo.skipNextValues)

@@ -1,5 +1,5 @@
-import {noop} from 'lib/buffer'
-import {Task, PgError} from 'types'
+import {noop} from '../buffer'
+import {Task, PgError} from '../../types'
 
 const charKeyCodes: {[key: string]: any} = {
   S: (error: Partial<PgError>, message: string) => error.level = message,
