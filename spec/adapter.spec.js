@@ -216,6 +216,7 @@ describe('Adapter', () => {
             let value;
             const wrapped = db.wrapperTransaction(target, (t) => {
                 value = t.key;
+                t.exec('SELECT 1');
             });
             expect(value).toEqual(target.key);
             expect(wrapped.key).toEqual(target.key);

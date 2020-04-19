@@ -23,7 +23,7 @@ exports.transaction = (adapter, error, fn) => {
 exports.wrapperTransaction = (adapter, error, target, fn) => {
     const t = new Transaction(adapter, error).start();
     const proxy = new Proxy(t, {
-        get: (t, name) => target[name] || t[name]
+        get: (t, name) => t[name] || target[name]
     });
     if (fn)
         applyFn(proxy, fn);

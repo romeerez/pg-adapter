@@ -26,7 +26,7 @@ export const wrapperTransaction = (
 ) => {
   const t = new Transaction(adapter, error).start()
   const proxy = new Proxy(t, {
-    get: (t, name) => (target as any)[name] || (t as any)[name]
+    get: (t, name) => (t as any)[name] || (target as any)[name]
   })
   if (fn)
     applyFn(proxy, fn)
