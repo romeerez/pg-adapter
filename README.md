@@ -209,31 +209,13 @@ Null from db won't get to parser.
 ## Transactions
 
 ```js
-const t = db.transaction()
-
-// it got a promise for full transaction
-t.promise.then(() => console.log('transaction complete'))
-
-try {
-  await t.exec('make several')
-  await t.exec('queries')
-  await t.commit() // or t.rollback()
-} catch (error) {
-  console.log('transaction failed')
-}
-```
-
-It can receive callback:
-
-```js
-const t = db.transaction(async t => {
+await db.transaction(async t => {
   // try-catch is done in transaction function
-  await t.exec('make several')
-  await t.exec('queries')
-  console.log('transaction failed')
+  await t.exec('you can use await')
+  t.exec('or just queries')
+  t.exec('without await')
   // commit automatically
 })
-t.promise.then(() => console.log('transaction complete'))
 ```
 
 ## Prepared statements
