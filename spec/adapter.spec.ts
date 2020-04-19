@@ -1,6 +1,6 @@
-import {Adapter} from '../adapter'
-import {ResultMode} from '../types'
-import {defaultLog, noopLog} from '../lib/log'
+import {Adapter, Transaction} from '../src/adapter'
+import {ResultMode} from '../src/types'
+import {defaultLog, noopLog} from '../src/lib/log'
 
 Adapter.defaultLog = false
 
@@ -240,10 +240,19 @@ describe('Adapter', () => {
       expect(queries).toEqual(['BEGIN', 'SELECT 2', 'COMMIT', 'SELECT 1'])
 
       queries.length = 0
-      db.transaction(t => {
+      db.transaction((t: Transaction) => {
         t.exec('SELECT 2')
       })
       db.exec('SELECT 1')
+      await db.sync()
+
+      const target = {key: 'value'}
+      let value
+      const wrapped = db.wrapperTransaction(target, (t) => {
+        value = t.key
+      })
+      expect(value).toEqual(target.key)
+      expect(wrapped.key).toEqual(target.key)
       await db.close()
     })
   })

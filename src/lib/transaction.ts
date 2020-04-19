@@ -21,6 +21,18 @@ export const transaction = (adapter: AdapterBase, error: PgError, fn?: (t: Trans
   return t
 }
 
+export const wrapperTransaction = (
+  adapter: AdapterBase, error: PgError, target: any, fn?: (t: typeof target & Transaction) => any
+) => {
+  const t = new Transaction(adapter, error).start()
+  const proxy = new Proxy(t, {
+    get: (t, name) => (target as any)[name] || (t as any)[name]
+  })
+  if (fn)
+    applyFn(proxy, fn)
+  return proxy as typeof target & Transaction
+}
+
 export class Transaction extends AdapterBase {
   adapter: AdapterBase
   error: PgError

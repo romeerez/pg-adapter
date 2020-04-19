@@ -20,6 +20,15 @@ exports.transaction = (adapter, error, fn) => {
         applyFn(t, fn);
     return t;
 };
+exports.wrapperTransaction = (adapter, error, target, fn) => {
+    const t = new Transaction(adapter, error).start();
+    const proxy = new Proxy(t, {
+        get: (t, name) => target[name] || t[name]
+    });
+    if (fn)
+        applyFn(proxy, fn);
+    return proxy;
+};
 class Transaction extends adapterBase_1.AdapterBase {
     constructor(adapter, error) {
         super({ pool: 0, decodeTypes: adapter.decodeTypes, log: adapter.log });

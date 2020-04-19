@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const adapter_1 = require("../adapter");
-const types_1 = require("../types");
-const log_1 = require("../lib/log");
+const adapter_1 = require("../src/adapter");
+const types_1 = require("../src/types");
+const log_1 = require("../src/lib/log");
 adapter_1.Adapter.defaultLog = false;
 describe('Adapter', () => {
     describe('constructor', () => {
@@ -207,10 +207,18 @@ describe('Adapter', () => {
             await db.sync();
             expect(queries).toEqual(['BEGIN', 'SELECT 2', 'COMMIT', 'SELECT 1']);
             queries.length = 0;
-            db.transaction(t => {
+            db.transaction((t) => {
                 t.exec('SELECT 2');
             });
             db.exec('SELECT 1');
+            await db.sync();
+            const target = { key: 'value' };
+            let value;
+            const wrapped = db.wrapperTransaction(target, (t) => {
+                value = t.key;
+            });
+            expect(value).toEqual(target.key);
+            expect(wrapped.key).toEqual(target.key);
             await db.close();
         });
     });

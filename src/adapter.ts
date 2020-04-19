@@ -5,7 +5,7 @@ import {sync} from './lib/sync'
 import {close} from './lib/close'
 import {defaultDecodeTypes} from './lib/defaultDecodeTypes'
 import {AdapterBase} from './lib/adapterBase'
-import {transaction, Transaction} from './lib/transaction'
+import {transaction, wrapperTransaction, Transaction} from './lib/transaction'
 import {defaultLog} from './lib/log'
 import {prepare} from './lib/prepare'
 
@@ -70,6 +70,11 @@ export class Adapter extends AdapterBase {
   transaction(fn?: (t: Transaction) => any) {
     const error: PgError = new Error()
     return transaction(this, error, fn)
+  }
+
+  wrapperTransaction(target: any, fn?: (t: typeof target & Transaction) => any) {
+    const error: PgError = new Error()
+    return wrapperTransaction(this, error, target, fn)
   }
 
   prepare(name: string, ...args: string[]) {

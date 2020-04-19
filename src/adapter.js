@@ -47,6 +47,10 @@ class Adapter extends adapterBase_1.AdapterBase {
         const error = new Error();
         return transaction_1.transaction(this, error, fn);
     }
+    wrapperTransaction(target, fn) {
+        const error = new Error();
+        return transaction_1.wrapperTransaction(this, error, target, fn);
+    }
     prepare(name, ...args) {
         return prepare_1.prepare(this, name, ...args);
     }
