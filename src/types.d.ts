@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { Socket as NativeSocket } from 'net';
-import { AdapterBase } from 'lib/adapterBase';
+import { AdapterBase } from './lib/adapterBase';
 export interface Socket extends NativeSocket {
     task?: Task;
     dataListener?: (data: Buffer) => any;
