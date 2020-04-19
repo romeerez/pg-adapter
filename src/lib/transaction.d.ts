@@ -14,8 +14,8 @@ export declare class Transaction extends AdapterBase {
     afterBegin: (socket: Socket, task: Task) => void;
     transaction(): Promise<any[]>;
     commit(): Promise<any>;
-    rollback(): any;
-    end(query: string | undefined, err: PgError): Promise<any>;
+    rollback(): Promise<any>;
+    end(query?: string, err?: PgError): Promise<any>;
     finish: (socket: Socket, task: Task) => void;
     performQuery(mode: ResultMode, query: string | TemplateStringsArray, args?: any[], prepared?: Prepared): Promise<unknown>;
     catch: (err: PgError) => void;

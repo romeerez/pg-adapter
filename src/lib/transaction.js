@@ -60,6 +60,8 @@ class Transaction extends adapterBase_1.AdapterBase {
             task_1.next(transaction.adapter, socket);
         };
         this.catch = (err) => {
+            if (this.failed)
+                return;
             this.error = err;
             this.failed = true;
         };

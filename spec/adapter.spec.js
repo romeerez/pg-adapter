@@ -217,10 +217,12 @@ describe('Adapter', () => {
             try {
                 await db.transaction((t) => {
                     t.exec('SELECT * FROM non_existing_table');
+                    t.exec('SELECT 1');
                 });
             }
             catch (err) {
                 error = err;
+                console.log(err);
             }
             expect(error).toBeTruthy();
             await db.close();

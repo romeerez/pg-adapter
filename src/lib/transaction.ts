@@ -97,7 +97,7 @@ export class Transaction extends AdapterBase {
     return this.end(queries.rollback)
   }
 
-  end(query: string = queries.commit, err: PgError) {
+  end(query: string = queries.commit, err?: PgError) {
     const task = createTask({
       query,
       adapter: this,
@@ -133,6 +133,8 @@ export class Transaction extends AdapterBase {
   }
 
   catch = (err: PgError) => {
+    if (this.failed)
+      return
     this.error = err
     this.failed = true
   }
