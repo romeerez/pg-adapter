@@ -26,7 +26,7 @@ export class AdapterBase {
 
   connect() {}
 
-  performQuery = (mode: ResultMode, query: string | TemplateStringsArray, args?: any[], prepared?: Prepared) => {
+  performQuery(mode: ResultMode, query: string | TemplateStringsArray, args?: any[], prepared?: Prepared) {
     this.connect()
     return new Promise((resolve, reject) => {
       const error: PgError = new Error()

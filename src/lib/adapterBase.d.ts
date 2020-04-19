@@ -11,7 +11,7 @@ export declare class AdapterBase {
         log: boolean | Log;
     });
     connect(): void;
-    performQuery: (mode: ResultMode, query: string | TemplateStringsArray, args?: any[] | undefined, prepared?: Prepared | undefined) => Promise<unknown>;
+    performQuery(mode: ResultMode, query: string | TemplateStringsArray, args?: any[], prepared?: Prepared): Promise<unknown>;
     query(sql: string | TemplateStringsArray, ...args: any[]): Promise<unknown>;
     objects(sql: string | TemplateStringsArray, ...args: any[]): Promise<unknown>;
     arrays(sql: string | TemplateStringsArray, ...args: any[]): Promise<unknown>;

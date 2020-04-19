@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const adapterBase_1 = require("./adapterBase");
 const task_1 = require("./task");
 const types_1 = require("../types");
-const buffer_1 = require("./buffer");
+const noop = () => { };
 var queries;
 (function (queries) {
     queries["begin"] = "BEGIN";
@@ -15,23 +15,26 @@ const applyFn = async (t, fn) => {
     t.commit();
 };
 exports.transaction = (adapter, error, fn) => {
-    const t = new Transaction(adapter, error).start();
+    const t = new Transaction(adapter, error);
+    const promises = [t.promise];
     if (fn)
-        applyFn(t, fn);
-    return t;
+        promises.push(applyFn(t, fn));
+    return Promise.all(promises);
 };
 exports.wrapperTransaction = (adapter, error, target, fn) => {
-    const t = new Transaction(adapter, error).start();
+    const t = new Transaction(adapter, error);
+    const promises = [t.promise];
     const proxy = new Proxy(t, {
         get: (t, name) => t[name] || target[name]
     });
     if (fn)
-        applyFn(proxy, fn);
-    return proxy;
+        promises.push(applyFn(proxy, fn));
+    return Promise.all(promises);
 };
 class Transaction extends adapterBase_1.AdapterBase {
     constructor(adapter, error) {
         super({ pool: 0, decodeTypes: adapter.decodeTypes, log: adapter.log });
+        this.failed = false;
         this.afterBegin = (socket, task) => {
             const { adapter } = task;
             adapter.log.finish(socket, task);
@@ -46,7 +49,8 @@ class Transaction extends adapterBase_1.AdapterBase {
         this.finish = (socket, task) => {
             const transaction = task.adapter;
             transaction.log.finish(socket, task);
-            task.failed ? task.reject(task.error) : task.resolve();
+            let error = this.failed ? this.error : task.failed && task.error;
+            error ? task.reject(error) : task.resolve(error);
             transaction.sockets.length = 0;
             transaction.task = task.next;
             transaction.adapter.sockets.push(socket);
@@ -55,29 +59,30 @@ class Transaction extends adapterBase_1.AdapterBase {
             socket.task = undefined;
             task_1.next(transaction.adapter, socket);
         };
+        this.catch = (err) => {
+            this.error = err;
+            this.failed = true;
+        };
         this.adapter = adapter;
         this.error = error;
-        this.resolve = buffer_1.noop;
-        this.reject = buffer_1.noop;
+        this.resolve = noop;
+        this.reject = noop;
         this.promise = new Promise((resolve, reject) => {
             this.resolve = resolve;
             this.reject = reject;
         });
-    }
-    start() {
         this.adapter.connect();
         const task = task_1.createTask({
             adapter: this.adapter,
             error: this.error,
-            resolve: buffer_1.noop,
-            reject: buffer_1.noop,
+            resolve: noop,
+            reject: noop,
             decodeTypes: this.adapter.decodeTypes,
             mode: types_1.ResultMode.skip,
             query: queries.begin,
             finish: this.afterBegin,
         });
         task_1.addTaskToAdapter(this.adapter, task);
-        return this;
     }
     transaction() {
         const error = new Error();
@@ -89,11 +94,11 @@ class Transaction extends adapterBase_1.AdapterBase {
     rollback() {
         return this.end(queries.rollback);
     }
-    end(query = queries.commit) {
+    end(query = queries.commit, err) {
         const task = task_1.createTask({
             query,
             adapter: this,
-            error: this.error,
+            error: err || this.error,
             resolve: this.resolve,
             reject: this.reject,
             finish: this.finish,
@@ -102,6 +107,11 @@ class Transaction extends adapterBase_1.AdapterBase {
         });
         task_1.addTaskToAdapter(this, task);
         return this;
+    }
+    performQuery(mode, query, args, prepared) {
+        const promise = super.performQuery(mode, query, args, prepared);
+        promise.catch(this.catch);
+        return promise;
     }
     then(...args) {
         this.promise.then(...args);

@@ -7,19 +7,6 @@ const sql_1 = require("./sql");
 const log_1 = require("./log");
 class AdapterBase {
     constructor({ pool, decodeTypes, log }) {
-        this.performQuery = (mode, query, args, prepared) => {
-            this.connect();
-            return new Promise((resolve, reject) => {
-                const error = new Error();
-                const task = task_1.createTask({
-                    mode, error, resolve, reject, prepared,
-                    adapter: this,
-                    query: sql_1.sql2(query, args),
-                    decodeTypes: this.decodeTypes,
-                });
-                task_1.addTaskToAdapter(this, task);
-            });
-        };
         this.sockets = new Array(pool).fill(null).map(() => new net_1.Socket({ readable: true, writable: true }));
         this.decodeTypes = decodeTypes;
         if (log === true)
@@ -30,6 +17,19 @@ class AdapterBase {
             this.log = log;
     }
     connect() { }
+    performQuery(mode, query, args, prepared) {
+        this.connect();
+        return new Promise((resolve, reject) => {
+            const error = new Error();
+            const task = task_1.createTask({
+                mode, error, resolve, reject, prepared,
+                adapter: this,
+                query: sql_1.sql2(query, args),
+                decodeTypes: this.decodeTypes,
+            });
+            task_1.addTaskToAdapter(this, task);
+        });
+    }
     query(sql, ...args) {
         return this.performQuery(types_1.ResultMode.objects, sql, args);
     }

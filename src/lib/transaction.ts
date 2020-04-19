@@ -1,7 +1,8 @@
 import {AdapterBase} from './adapterBase'
 import {createTask, addTaskToAdapter, next} from './task'
-import {Socket, Task, ResultMode, PgError} from '../types'
-import {noop} from './buffer'
+import {Socket, Task, ResultMode, PgError, Prepared} from '../types'
+
+const noop = () => {}
 
 enum queries {
   begin = 'BEGIN',
@@ -15,22 +16,24 @@ const applyFn = async (t: Transaction, fn: (t: Transaction) => any) => {
 }
 
 export const transaction = (adapter: AdapterBase, error: PgError, fn?: (t: Transaction) => any) => {
-  const t = new Transaction(adapter, error).start()
+  const t = new Transaction(adapter, error)
+  const promises = [t.promise]
   if (fn)
-    applyFn(t, fn)
-  return t
+    promises.push(applyFn(t, fn))
+  return Promise.all(promises)
 }
 
 export const wrapperTransaction = (
   adapter: AdapterBase, error: PgError, target: any, fn?: (t: typeof target & Transaction) => any
 ) => {
-  const t = new Transaction(adapter, error).start()
+  const t = new Transaction(adapter, error)
+  const promises = [t.promise]
   const proxy = new Proxy(t, {
     get: (t, name) => (t as any)[name] || (target as any)[name]
   })
   if (fn)
-    applyFn(proxy, fn)
-  return proxy as typeof target & Transaction
+    promises.push(applyFn(proxy, fn))
+  return Promise.all(promises)
 }
 
 export class Transaction extends AdapterBase {
@@ -38,8 +41,9 @@ export class Transaction extends AdapterBase {
   error: PgError
   promise: Promise<any>
   resolve: () => any
-  reject: () => any
+  reject: (err: PgError) => any
   task?: Task
+  failed = false
 
   constructor(adapter: AdapterBase, error: PgError) {
     super({pool: 0, decodeTypes: adapter.decodeTypes, log: adapter.log})
@@ -51,10 +55,8 @@ export class Transaction extends AdapterBase {
       this.resolve = resolve
       this.reject = reject
     })
-  }
-
-  start() {
     this.adapter.connect()
+
     const task = createTask({
       adapter: this.adapter,
       error: this.error,
@@ -65,8 +67,7 @@ export class Transaction extends AdapterBase {
       query: queries.begin,
       finish: this.afterBegin,
     })
-    addTaskToAdapter(this.adapter, task as Task)
-    return this
+    addTaskToAdapter(this.adapter, task)
   }
 
   afterBegin = (socket: Socket, task: Task) => {
@@ -96,11 +97,11 @@ export class Transaction extends AdapterBase {
     return this.end(queries.rollback)
   }
 
-  end(query: string = queries.commit) {
+  end(query: string = queries.commit, err: PgError) {
     const task = createTask({
       query,
       adapter: this,
-      error: this.error,
+      error: err || this.error,
       resolve: this.resolve,
       reject: this.reject,
       finish: this.finish,
@@ -114,7 +115,8 @@ export class Transaction extends AdapterBase {
   finish = (socket: Socket, task: Task) => {
     const transaction = task.adapter as Transaction
     transaction.log.finish(socket, task)
-    task.failed ? task.reject(task.error) : task.resolve()
+    let error = this.failed ? this.error : task.failed && task.error
+    error ? task.reject(error) : task.resolve(error)
     transaction.sockets.length = 0
     transaction.task = task.next
     transaction.adapter.sockets.push(socket)
@@ -122,6 +124,17 @@ export class Transaction extends AdapterBase {
       transaction.adapter.lastTask = undefined
     socket.task = undefined
     next(transaction.adapter, socket)
+  }
+
+  performQuery(mode: ResultMode, query: string | TemplateStringsArray, args?: any[], prepared?: Prepared) {
+    const promise = super.performQuery(mode, query, args, prepared)
+    promise.catch(this.catch)
+    return promise
+  }
+
+  catch = (err: PgError) => {
+    this.error = err
+    this.failed = true
   }
 
   then(...args: any[]) {

@@ -200,26 +200,29 @@ describe('Adapter', () => {
                     start: () => { },
                     finish: (socket, { query }) => { queries.push(query); },
                 } });
-            const t = db.transaction();
-            db.exec('SELECT 1');
-            t.exec('SELECT 2');
-            t.commit();
-            await db.sync();
-            expect(queries).toEqual(['BEGIN', 'SELECT 2', 'COMMIT', 'SELECT 1']);
-            queries.length = 0;
             db.transaction((t) => {
                 t.exec('SELECT 2');
             });
             db.exec('SELECT 1');
             await db.sync();
+            expect(queries).toEqual(['BEGIN', 'SELECT 2', 'COMMIT', 'SELECT 1']);
             const target = { key: 'value' };
             let value;
-            const wrapped = db.wrapperTransaction(target, (t) => {
+            await db.wrapperTransaction(target, (t) => {
                 value = t.key;
                 t.exec('SELECT 1');
             });
             expect(value).toEqual(target.key);
-            expect(wrapped.key).toEqual(target.key);
+            let error;
+            try {
+                await db.transaction((t) => {
+                    t.exec('SELECT * FROM non_existing_table');
+                });
+            }
+            catch (err) {
+                error = err;
+            }
+            expect(error).toBeTruthy();
             await db.close();
         });
     });
