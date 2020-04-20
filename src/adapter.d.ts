@@ -17,7 +17,7 @@ export declare class Adapter extends AdapterBase {
     connect(): Promise<void>;
     sync: () => Promise<unknown> | undefined;
     close: () => Promise<void>;
-    transaction(fn?: (t: Transaction) => any): Transaction;
-    wrapperTransaction(target: any, fn?: (t: typeof target & Transaction) => any): any;
+    transaction(fn?: (t: Transaction) => any): Promise<any[]>;
+    wrapperTransaction(target: any, fn?: (t: typeof target & Transaction) => any): Promise<any[]>;
     prepare(name: string, ...args: string[]): (prepareTemplate: TemplateStringsArray, prepareArgs?: any[] | undefined) => import("./types").Prepared;
 }

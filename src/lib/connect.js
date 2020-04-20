@@ -63,7 +63,9 @@ class Connect {
                 rejectUnauthorized: false,
                 servername: net_1.isIP(host) === 0 ? host : undefined
             };
+            const { task } = this.socket;
             this.socket = tls_1.default.connect(options, () => this.sendStartupMessage());
+            this.socket.task = task;
             this.socket.prepared = {};
         }
         else {

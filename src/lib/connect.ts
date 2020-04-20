@@ -75,9 +75,11 @@ class Connect {
         rejectUnauthorized: false,
         servername: isIP(host) === 0 ? host : undefined
       }
+      const {task} = this.socket
       this.socket = tls.connect(options, () =>
         this.sendStartupMessage()
       ) as unknown as Socket
+      this.socket.task = task
       this.socket.prepared = {}
     } else {
       this.sendStartupMessage()
