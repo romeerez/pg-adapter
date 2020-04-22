@@ -1,13 +1,10 @@
-import { AdapterProps, ConnectionSettingType, Log, ResultMode } from './types';
+import { AdapterProps, ConnectionSettingType, PgError, Log, ResultMode } from './types';
 import { AdapterBase } from './lib/adapterBase';
 import { Transaction } from './lib/transaction';
 export { quote } from './lib/quote';
 export { sql } from './lib/sql';
 export { parseUrl } from './lib/parseUrl';
-export { Transaction };
-export { AdapterBase };
-export { AdapterProps };
-export { ResultMode };
+export { Transaction, AdapterBase, AdapterProps, ResultMode, PgError };
 export declare class Adapter extends AdapterBase {
     static defaultLog: boolean | Log;
     connectionSettings: ConnectionSettingType;

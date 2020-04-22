@@ -12,10 +12,7 @@ import {prepare} from './lib/prepare'
 export {quote} from './lib/quote'
 export {sql} from './lib/sql'
 export {parseUrl} from './lib/parseUrl'
-export {Transaction}
-export {AdapterBase}
-export {AdapterProps}
-export {ResultMode}
+export {Transaction, AdapterBase, AdapterProps, ResultMode, PgError}
 
 export class Adapter extends AdapterBase {
   static defaultLog: boolean | Log = defaultLog
