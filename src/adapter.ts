@@ -1,4 +1,4 @@
-import {AdapterProps, ConnectionSettingType, PgError, Log} from './types'
+import {AdapterProps, ConnectionSettingType, PgError, Log, ResultMode} from './types'
 import {parseUrl} from './lib/parseUrl'
 import {connect} from './lib/connect'
 import {sync} from './lib/sync'
@@ -15,6 +15,7 @@ export {parseUrl} from './lib/parseUrl'
 export {Transaction}
 export {AdapterBase}
 export {AdapterProps}
+export {ResultMode}
 
 export class Adapter extends AdapterBase {
   static defaultLog: boolean | Log = defaultLog

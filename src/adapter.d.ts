@@ -1,4 +1,4 @@
-import { AdapterProps, ConnectionSettingType, Log } from './types';
+import { AdapterProps, ConnectionSettingType, Log, ResultMode } from './types';
 import { AdapterBase } from './lib/adapterBase';
 import { Transaction } from './lib/transaction';
 export { quote } from './lib/quote';
@@ -7,6 +7,7 @@ export { parseUrl } from './lib/parseUrl';
 export { Transaction };
 export { AdapterBase };
 export { AdapterProps };
+export { ResultMode };
 export declare class Adapter extends AdapterBase {
     static defaultLog: boolean | Log;
     connectionSettings: ConnectionSettingType;

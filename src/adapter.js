@@ -1,5 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const types_1 = require("./types");
+exports.ResultMode = types_1.ResultMode;
 const parseUrl_1 = require("./lib/parseUrl");
 const connect_1 = require("./lib/connect");
 const sync_1 = require("./lib/sync");
