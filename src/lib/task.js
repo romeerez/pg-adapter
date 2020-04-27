@@ -61,7 +61,7 @@ exports.next = (adapter, socket) => {
         query = task.query;
     else
         query = task.prepared.sql;
-    const len = query.length + 5;
+    const len = Buffer.byteLength(query) + 5;
     const buffer = Buffer.alloc(len + 1);
     buffer[0] = queryCode;
     buffer_1.encodeInt32(buffer, 1, len);

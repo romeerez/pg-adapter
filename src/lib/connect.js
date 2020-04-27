@@ -77,7 +77,7 @@ class Connect {
         messageHandler_1.handleMessage(socket, this.settings);
         const { user, database } = this.settings;
         const message = `user\0${user}\0database\0${database}\0\0`;
-        const len = 8 + message.length;
+        const len = 8 + Buffer.byteLength(message);
         const buf = Buffer.alloc(len);
         buffer_1.encodeInt32(buf, 0, len);
         versionBuf.copy(buf, 4);

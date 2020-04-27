@@ -82,7 +82,7 @@ export const next = (adapter: {task?: Task, lastTask?: Task, log: Log}, socket: 
   else
     query = task.prepared.sql
 
-  const len = query.length + 5
+  const len = Buffer.byteLength(query) + 5
   const buffer = Buffer.alloc(len + 1)
   buffer[0] = queryCode
   encodeInt32(buffer, 1, len)
