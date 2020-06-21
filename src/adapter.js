@@ -1,24 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Adapter = exports.ResultMode = exports.AdapterBase = exports.Transaction = void 0;
 const types_1 = require("./types");
-exports.ResultMode = types_1.ResultMode;
+Object.defineProperty(exports, "ResultMode", { enumerable: true, get: function () { return types_1.ResultMode; } });
 const parseUrl_1 = require("./lib/parseUrl");
 const connect_1 = require("./lib/connect");
 const sync_1 = require("./lib/sync");
 const close_1 = require("./lib/close");
 const defaultDecodeTypes_1 = require("./lib/defaultDecodeTypes");
 const adapterBase_1 = require("./lib/adapterBase");
-exports.AdapterBase = adapterBase_1.AdapterBase;
+Object.defineProperty(exports, "AdapterBase", { enumerable: true, get: function () { return adapterBase_1.AdapterBase; } });
 const transaction_1 = require("./lib/transaction");
-exports.Transaction = transaction_1.Transaction;
+Object.defineProperty(exports, "Transaction", { enumerable: true, get: function () { return transaction_1.Transaction; } });
 const log_1 = require("./lib/log");
 const prepare_1 = require("./lib/prepare");
 var quote_1 = require("./lib/quote");
-exports.quote = quote_1.quote;
+Object.defineProperty(exports, "quote", { enumerable: true, get: function () { return quote_1.quote; } });
 var sql_1 = require("./lib/sql");
-exports.sql = sql_1.sql;
+Object.defineProperty(exports, "sql", { enumerable: true, get: function () { return sql_1.sql; } });
 var parseUrl_2 = require("./lib/parseUrl");
-exports.parseUrl = parseUrl_2.parseUrl;
+Object.defineProperty(exports, "parseUrl", { enumerable: true, get: function () { return parseUrl_2.parseUrl; } });
 class Adapter extends adapterBase_1.AdapterBase {
     constructor({ host = '127.0.0.1', port = 5432, database = 'postgres', user = process.env.USER || 'postgres', password = '', pool = 10, log = Adapter.defaultLog, decodeTypes, } = {}) {
         super({ pool, decodeTypes: decodeTypes || defaultDecodeTypes_1.defaultDecodeTypes, log });

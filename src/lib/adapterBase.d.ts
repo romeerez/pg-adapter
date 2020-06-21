@@ -11,10 +11,10 @@ export declare class AdapterBase {
         log: boolean | Log;
     });
     connect(): void;
-    performQuery(mode: ResultMode, query: string | TemplateStringsArray, args?: any[], prepared?: Prepared): Promise<unknown>;
-    query(sql: string | TemplateStringsArray, ...args: any[]): Promise<unknown>;
-    objects(sql: string | TemplateStringsArray, ...args: any[]): Promise<unknown>;
-    arrays(sql: string | TemplateStringsArray, ...args: any[]): Promise<unknown>;
-    value(sql: string | TemplateStringsArray, ...args: any[]): Promise<unknown>;
-    exec(sql: string | TemplateStringsArray, ...args: any[]): Promise<unknown>;
+    performQuery(mode: ResultMode, query: string | TemplateStringsArray | Promise<string>, args?: any[], prepared?: Prepared): Promise<unknown>;
+    query(sql: string | TemplateStringsArray | Promise<string>, ...args: any[]): Promise<unknown>;
+    objects(sql: string | TemplateStringsArray | Promise<string>, ...args: any[]): Promise<unknown>;
+    arrays(sql: string | TemplateStringsArray | Promise<string>, ...args: any[]): Promise<unknown>;
+    value(sql: string | TemplateStringsArray | Promise<string>, ...args: any[]): Promise<unknown>;
+    exec(sql: string | TemplateStringsArray | Promise<string>, ...args: any[]): Promise<unknown>;
 }

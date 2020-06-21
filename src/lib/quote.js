@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.quote = void 0;
 const singleQuoteRegex = /'/g;
 const doubleQuoteRegex = /"/g;
 const quoteValue = (value) => {

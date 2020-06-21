@@ -26,37 +26,42 @@ export class AdapterBase {
 
   connect() {}
 
-  performQuery(mode: ResultMode, query: string | TemplateStringsArray, args?: any[], prepared?: Prepared) {
+  performQuery(
+    mode: ResultMode, query: string | TemplateStringsArray | Promise<string>, args?: any[], prepared?: Prepared
+  ) {
     this.connect()
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+      if ((query as any).then)
+        query = await query
+
       const error: PgError = new Error()
       const task = createTask({
         mode, error, resolve, reject, prepared,
         adapter: this,
-        query: sql2(query, args),
+        query: sql2(query as string | TemplateStringsArray, args),
         decodeTypes: this.decodeTypes,
       })
       addTaskToAdapter(this, task)
     })
   }
 
-  query(sql: string | TemplateStringsArray, ...args: any[]) {
+  query(sql: string | TemplateStringsArray | Promise<string>, ...args: any[]) {
     return this.performQuery(ResultMode.objects, sql, args)
   }
 
-  objects(sql: string | TemplateStringsArray, ...args: any[]) {
+  objects(sql: string | TemplateStringsArray | Promise<string>, ...args: any[]) {
     return this.performQuery(ResultMode.objects, sql, args)
   }
 
-  arrays(sql: string | TemplateStringsArray, ...args: any[]) {
+  arrays(sql: string | TemplateStringsArray | Promise<string>, ...args: any[]) {
     return this.performQuery(ResultMode.arrays, sql, args)
   }
 
-  value(sql: string | TemplateStringsArray, ...args: any[]) {
+  value(sql: string | TemplateStringsArray | Promise<string>, ...args: any[]) {
     return this.performQuery(ResultMode.value, sql, args)
   }
 
-  exec(sql: string | TemplateStringsArray, ...args: any[]) {
+  exec(sql: string | TemplateStringsArray | Promise<string>, ...args: any[]) {
     return this.performQuery(ResultMode.skip, sql, args)
   }
 }

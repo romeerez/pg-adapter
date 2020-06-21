@@ -17,8 +17,8 @@ export declare const addTaskToAdapter: (adapter: {
     log: Log;
 }, task: Task) => void;
 export declare const next: (adapter: {
-    task?: Task | undefined;
-    lastTask?: Task | undefined;
+    task?: Task;
+    lastTask?: Task;
     log: Log;
 }, socket: Socket) => void;
 export {};

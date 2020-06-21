@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseError = void 0;
 const buffer_1 = require("../buffer");
 const charKeyCodes = {
     S: (error, message) => error.level = message,

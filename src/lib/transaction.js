@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Transaction = exports.wrapperTransaction = exports.transaction = void 0;
 const adapterBase_1 = require("./adapterBase");
 const task_1 = require("./task");
 const types_1 = require("../types");

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.removeListener = exports.handleMessage = void 0;
 const buffer_1 = require("./buffer");
 const auth_1 = require("./handlers/auth");
 const complete_1 = require("./handlers/complete");

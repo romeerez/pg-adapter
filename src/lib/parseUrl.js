@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseUrl = void 0;
 exports.parseUrl = (url = process.env.DATABASE_URL) => {
     if (!url)
         throw new Error('Provide url or DATABASE_URL env variable');

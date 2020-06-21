@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AdapterBase = void 0;
 const net_1 = require("net");
 const types_1 = require("../types");
 const task_1 = require("./task");
@@ -19,7 +20,9 @@ class AdapterBase {
     connect() { }
     performQuery(mode, query, args, prepared) {
         this.connect();
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            if (query.then)
+                query = await query;
             const error = new Error();
             const task = task_1.createTask({
                 mode, error, resolve, reject, prepared,

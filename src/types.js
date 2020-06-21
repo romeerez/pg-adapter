@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ResultMode = void 0;
 var ResultMode;
 (function (ResultMode) {
     ResultMode[ResultMode["objects"] = 0] = "objects";

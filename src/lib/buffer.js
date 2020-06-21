@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getMessage = exports.throwError = exports.noop = exports.skipMessage = exports.getMessageLength = exports.decodeInt16 = exports.decodeInt32 = exports.encodeInt32 = void 0;
 exports.encodeInt32 = (buf, i, n) => {
     buf[i] = n >> 24 & 0xff;
     buf[i + 1] = n >> 16 & 0xff;

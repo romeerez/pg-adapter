@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.defaultDecodeTypes = void 0;
 const trueCode = 'T'.charCodeAt(0);
 const toInt = (value, pos, size) => parseInt(value.toString(undefined, pos, pos + size));
 const toFloat = (value, pos, size) => parseFloat(value.toString(undefined, pos, pos + size));

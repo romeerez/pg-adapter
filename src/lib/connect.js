@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.connect = void 0;
 const net_1 = require("net");
 const tls_1 = __importDefault(require("tls"));
 const types_1 = require("../types");

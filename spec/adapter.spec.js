@@ -93,6 +93,12 @@ describe('Adapter', () => {
             expect(result).toEqual(1);
             await db.close();
         });
+        it('accept Promise with sql', async () => {
+            const db = adapter_1.Adapter.fromURL({ pool: 1 });
+            const result = await db.performQuery(types_1.ResultMode.value, Promise.resolve('SELECT 1'));
+            expect(result).toEqual(1);
+            await db.close();
+        });
         it('can perform multiple queries in queue', async () => {
             const db = adapter_1.Adapter.fromURL({ pool: 1 });
             const results = await Promise.all([

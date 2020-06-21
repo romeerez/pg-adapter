@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.prepare = void 0;
 const types_1 = require("../types");
 const sql_1 = require("./sql");
 const quote_1 = require("./quote");

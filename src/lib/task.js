@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.next = exports.addTaskToAdapter = exports.createTask = void 0;
 const buffer_1 = require("./buffer");
 const finishTask = (socket, task) => {
     const { adapter } = task;

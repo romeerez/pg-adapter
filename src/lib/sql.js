@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.sql2 = exports.sql = void 0;
 const quote_1 = require("./quote");
 const process = (parts, args) => {
     if (typeof parts === 'string')

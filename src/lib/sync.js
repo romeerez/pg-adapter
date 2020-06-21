@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.sync = void 0;
 exports.sync = ({ lastTask: last }) => {
     if (!last)
         return;

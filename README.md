@@ -73,10 +73,10 @@ await db.connect()
 // if you forgot to connect it will connect automatically
 // when making query
 
-const objects = await db.objects('SELECT * FROM example')
+let objects = await db.objects('SELECT * FROM example')
 // [{id: 1, name: 'vasya'}, {id: 2, name: 'petya'}]
 
-const sameObjects = await db.query('SELECT * FROM example')
+let sameObjects = await db.query('SELECT * FROM example')
 // .query is alias for .objects
 
 const arrays = await db.arrays('SELECT * FROM example')
@@ -135,6 +135,12 @@ You can specify types for ts compiler to know:
 
 ```typescript
 const [a, b, c] = <[number, number, number]>await db.value('SELECT 1; SELECT 2; SELECT 3')
+```
+
+If Promise passed instead of string it will wait for it automatically:
+
+```typescript
+const result = await db.query(Promise.resolve('SELECT 1'))
 ```
 
 ## Pool
