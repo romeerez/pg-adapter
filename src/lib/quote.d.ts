@@ -1,1 +1,1 @@
-export declare const quote: (value: any) => any;
+export declare const quote: (value: any) => string;
