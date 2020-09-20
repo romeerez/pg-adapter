@@ -1,6 +1,6 @@
 {
   "name": "pg-adapter",
-  "version": "1.1.54",
+  "version": "1.1.55",
   "description": "Efficient and usable Postgresql client with pool",
   "main": "dist/adapter.js",
   "files": [
