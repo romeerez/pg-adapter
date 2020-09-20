@@ -9,10 +9,6 @@ export default {
       file: pkg.main,
       format: 'cjs',
     },
-    {
-      file: pkg.module,
-      format: 'esm',
-    },
   ],
   external: [...Object.keys(pkg.dependencies || {})],
   plugins: [
