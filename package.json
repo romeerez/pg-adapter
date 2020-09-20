@@ -5,7 +5,7 @@
   "main": "dist/adapter.js",
   "module": "dist/adapter.es.js",
   "types": "src/adapter.d.ts",
-  "repository": "https://gitlab.com/romikus/pg-adapter",
+  "repository": "https://github.com/romeerez/pg-adapter",
   "author": "Roman Kushyn",
   "license": "MIT",
   "keywords": [
