@@ -1,6 +1,6 @@
 {
   "name": "pg-adapter",
-  "version": "1.1.55",
+  "version": "1.1.56",
   "description": "Efficient and usable Postgresql client with pool",
   "main": "dist/adapter.js",
   "files": [
@@ -19,8 +19,10 @@
   ],
   "scripts": {
     "start": "tsc --watch",
+    "test": "jest test",
     "build": "tsc",
-    "prepublish": "tsc"
+    "prepublish": "tsc",
+    "lint": "eslint --fix src"
   },
   "dependencies": {
     "chalk": "^3.0.0"
@@ -29,9 +31,15 @@
     "@babel/preset-env": "^7.11.5",
     "@types/jest": "^25.2.1",
     "@types/node": "^13.11.0",
+    "@typescript-eslint/eslint-plugin": "^4.8.2",
+    "@typescript-eslint/parser": "^4.8.2",
     "babel-jest": "^26.3.0",
     "dotenv": "^8.2.0",
+    "eslint": "^7.14.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
     "jest": "^26.4.2",
+    "prettier": "^2.2.1",
     "ts-jest": "^25.3.1",
     "typescript": "^3.8.3"
   }

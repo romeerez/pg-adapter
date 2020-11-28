@@ -1,16 +1,17 @@
-import {Socket as NativeSocket} from 'net'
-import {AdapterBase} from './lib/adapterBase'
+import { Socket as NativeSocket } from 'net'
+import { AdapterBase } from './lib/adapterBase'
+import { Value } from './lib/quote'
 
 export interface Socket extends NativeSocket {
-  task?: Task,
-  dataListener?: (data: Buffer) => any,
-  queryStartTime?: [number, number],
-  prepared: {[key: string]: boolean}
+  task?: Task
+  dataListener?: (data: Buffer) => void
+  queryStartTime?: [number, number]
+  prepared: { [key: string]: boolean }
 }
 
 export interface Creds {
-  user: string,
-  password: string,
+  user: string
+  password: string
 }
 
 export interface ConnectionSettingType {
@@ -22,44 +23,44 @@ export interface ConnectionSettingType {
 }
 
 export interface Log {
-  start: (socket: Socket, task: Task) => any,
-  finish: (socket: Socket, task: Task) => any,
+  start: <T>(socket: Socket, task: Task<T>) => void
+  finish: <T>(socket: Socket, task: Task<T>) => void
 }
 
 export interface AdapterProps extends Partial<ConnectionSettingType> {
-  pool?: number,
-  log?: boolean | Log,
+  pool?: number
+  log?: boolean | Log
   decodeTypes?: DecodeTypes
 }
 
 export interface PgError extends Error {
-  message: string,
-  query?: string,
-  level?: string,
-  details?: string,
-  hint?: string,
-  position?: string,
-  innerPosition?: string,
-  innerQuery?: string,
-  trace?: string,
-  schema?: string,
-  table?: string,
-  column?: string,
-  dataType?: string,
-  constraint?: string,
-  file?: string,
-  line?: string,
-  process?: string,
+  message: string
+  query?: string
+  level?: string
+  details?: string
+  hint?: string
+  position?: string
+  innerPosition?: string
+  innerQuery?: string
+  trace?: string
+  schema?: string
+  table?: string
+  column?: string
+  dataType?: string
+  constraint?: string
+  file?: string
+  line?: string
+  process?: string
 }
 
 export interface AuthData {
-  clientNonce?: string,
-  signature?: string,
+  clientNonce?: string
+  signature?: string
 }
 
-export type DecodeFunction = (data: Buffer, pos: number, size: number) => any
+export type DecodeFunction = (data: Buffer, pos: number, size: number) => void
 
-export type DecodeTypes = {[key: string]: DecodeFunction}
+export type DecodeTypes = { [key: string]: DecodeFunction }
 
 export enum ResultMode {
   objects = 0,
@@ -69,39 +70,42 @@ export enum ResultMode {
 }
 
 export interface ParseInfo {
-  resultNumber: number,
-  skipNextValues: boolean,
-  type?: number,
-  names?: Array<string>,
-  types?: Uint32Array,
-  columnsCount?: number,
+  resultNumber: number
+  skipNextValues: boolean
+  type?: number
+  names?: Array<string>
+  types?: Uint32Array
+  columnsCount?: number
 }
 
-export interface Task {
-  adapter: AdapterBase,
-  mode: ResultMode,
-  error: PgError,
-  query: string,
-  resolve: (...args: any[]) => any,
-  reject: (err: PgError) => any,
-  finish: (socket: Socket, task: Task) => any,
-  decodeTypes: DecodeTypes,
-  failed?: boolean,
-  authData?: AuthData,
-  result?: any[] | undefined,
-  parseInfo: ParseInfo,
-  next?: Task,
-  last?: Task,
-  prepared?: Prepared,
+export interface Task<T = unknown> {
+  adapter: AdapterBase
+  mode: ResultMode
+  error: PgError
+  query: string
+  resolve: (result?: T) => void
+  reject: (err: PgError) => void
+  finish: (socket: Socket, task: Task<T>) => void
+  decodeTypes: DecodeTypes
+  failed?: boolean
+  authData?: AuthData
+  result?: T
+  parseInfo: ParseInfo
+  next?: Task<T>
+  last?: Task<T>
+  prepared?: Prepared
 }
 
 export interface Prepared {
-  sql: string,
-  name: string,
-  performQuery: (mode: ResultMode, args: any[]) => Promise<any>,
-  query: (...args: any[]) => Promise<any>
-  objects: (...args: any[]) => Promise<any>
-  arrays: (...args: any[]) => Promise<any>
-  value: (...args: any[]) => Promise<any>
-  exec: (...args: any[]) => Promise<any>
+  sql: string
+  name: string
+  performQuery: (
+    mode: ResultMode,
+    args: TemplateStringsArray | Value[],
+  ) => Promise<unknown>
+  query: (...args: TemplateStringsArray | Value[]) => Promise<unknown>
+  objects: (...args: TemplateStringsArray | Value[]) => Promise<unknown>
+  arrays: (...args: TemplateStringsArray | Value[]) => Promise<unknown>
+  value: (...args: TemplateStringsArray | Value[]) => Promise<unknown>
+  exec: (...args: TemplateStringsArray | Value[]) => Promise<unknown>
 }

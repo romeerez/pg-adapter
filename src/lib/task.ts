@@ -1,36 +1,39 @@
-import {AdapterBase} from './adapterBase'
-import {DecodeTypes, PgError, ResultMode, Task, Socket, Log, Prepared} from '../types'
-import {encodeInt32} from './buffer'
+import { AdapterBase } from './adapterBase'
+import {
+  DecodeTypes,
+  PgError,
+  ResultMode,
+  Task,
+  Socket,
+  Log,
+  Prepared,
+} from '../types'
+import { encodeInt32 } from './buffer'
 
 type RequiredParams = {
-  adapter: AdapterBase,
-  mode: ResultMode,
-  query: string,
-  error: PgError,
-  decodeTypes: DecodeTypes,
-  resolve: (...args: any[]) => any,
-  reject: (err: PgError) => any,
+  adapter: AdapterBase
+  mode: ResultMode
+  query: string
+  error: PgError
+  decodeTypes: DecodeTypes
+  resolve: (...args: unknown[]) => void
+  reject: (err: PgError) => void
 }
 
 const finishTask = (socket: Socket, task: Task) => {
-  const {adapter} = task
-  const {prepared} = task
+  const { adapter } = task
+  const { prepared } = task
   const prepareReady = prepared && !socket.prepared[prepared.name]
-  if (!prepareReady)
-    adapter.log.finish(socket, task)
-  if (task.failed)
-    task.reject(task.error)
-  else if (!prepareReady)
-    task.resolve(task.result)
+  if (!prepareReady) adapter.log.finish(socket, task)
+  if (task.failed) task.reject(task.error)
+  else if (!prepareReady) task.resolve(task.result)
 
   socket.task = undefined
 
   if (prepareReady && !task.failed) {
     socket.prepared[(prepared as Prepared).name] = true
-    if (adapter.task)
-      task.next = adapter.task
-    else
-      adapter.lastTask = task
+    if (adapter.task) task.next = adapter.task
+    else adapter.lastTask = task
     adapter.task = task
     task.parseInfo.resultNumber = 0
   } else if (adapter.lastTask === task) {
@@ -41,23 +44,42 @@ const finishTask = (socket: Socket, task: Task) => {
 }
 
 export const createTask: (params: Partial<Task> & RequiredParams) => Task = ({
-  adapter, mode, query, error, decodeTypes, prepared, resolve, reject, finish = finishTask
+  adapter,
+  mode,
+  query,
+  error,
+  decodeTypes,
+  prepared,
+  resolve,
+  reject,
+  finish = finishTask,
 }) => ({
-  adapter, mode, query, error, decodeTypes, prepared, resolve, reject, finish,
+  adapter,
+  mode,
+  query,
+  error,
+  decodeTypes,
+  prepared,
+  resolve,
+  reject,
+  finish,
   parseInfo: {
     resultNumber: 0,
-    skipNextValues: false
-  }
+    skipNextValues: false,
+  },
 })
 
-export const addTaskToAdapter = (adapter: {task?: Task, lastTask?: Task, sockets: Socket[], log: Log}, task: Task) => {
+export const addTaskToAdapter = (
+  adapter: { task?: Task; lastTask?: Task; sockets: Socket[]; log: Log },
+  task: Task,
+) => {
   if (adapter.task) {
-    (adapter.lastTask as Task).next = task
+    ;(adapter.lastTask as Task).next = task
     adapter.lastTask = task
   } else {
     adapter.task = task
     adapter.lastTask = task
-    for (let socket of adapter.sockets) {
+    for (const socket of adapter.sockets) {
       if (!socket.task) {
         next(adapter, socket)
         return
@@ -68,19 +90,19 @@ export const addTaskToAdapter = (adapter: {task?: Task, lastTask?: Task, sockets
 
 const queryCode = 'Q'.charCodeAt(0)
 
-export const next = (adapter: {task?: Task, lastTask?: Task, log: Log}, socket: Socket) => {
-  const {task} = adapter
-  if (!task)
-    return
+export const next = (
+  adapter: { task?: Task; lastTask?: Task; log: Log },
+  socket: Socket,
+) => {
+  const { task } = adapter
+  if (!task) return
 
   socket.task = task
   adapter.task = task.next
 
   let query: string
-  if (!task.prepared || socket.prepared[task.prepared.name])
-    query = task.query
-  else
-    query = task.prepared.sql
+  if (!task.prepared || socket.prepared[task.prepared.name]) query = task.query
+  else query = task.prepared.sql
 
   const len = Buffer.byteLength(query) + 5
   const buffer = Buffer.alloc(len + 1)

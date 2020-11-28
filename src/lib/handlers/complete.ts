@@ -1,6 +1,6 @@
-import {Task} from '../../types'
+import { Task } from '../../types'
 
-export const complete = ({parseInfo}: Task) => {
+export const complete = ({ parseInfo }: Task) => {
   parseInfo.resultNumber++
   parseInfo.skipNextValues = false
 }

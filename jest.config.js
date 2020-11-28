@@ -1,15 +1,11 @@
 module.exports = {
-  "roots": [
-    "<rootDir>/test"
+  roots: ['<rootDir>/test'],
+  testMatch: [
+    '**/__tests__/**/*.+(ts|tsx|js)',
+    '**/?(*.)+(test|test).+(ts|tsx|js)',
   ],
-  "testMatch": [
-    "**/__tests__/**/*.+(ts|tsx|js)",
-    "**/?(*.)+(test|test).+(ts|tsx|js)"
-  ],
-  "transform": {
-    "^.+\\.(ts|tsx)$": "ts-jest"
+  transform: {
+    '^.+\\.(ts|tsx)$': 'ts-jest',
   },
-  "setupFiles": [
-    "./config/dotenv"
-  ],
+  setupFiles: ['./config/dotenv'],
 }

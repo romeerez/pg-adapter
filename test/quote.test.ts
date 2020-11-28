@@ -1,4 +1,4 @@
-import {quote} from '../src/adapter'
+import { quote } from '../src/adapter'
 
 const date = new Date()
 date.setUTCFullYear(2020)
@@ -33,12 +33,12 @@ describe('quote', () => {
   })
 
   it('can stringify JSON', () => {
-    expect(quote({key: `val"ue`})).toBe(`'{"key":"val\\"ue"}'`)
+    expect(quote({ key: `val"ue` })).toBe(`'{"key":"val\\"ue"}'`)
   })
 
   it('can quote array', () => {
-    expect(quote([1, 'string', true, date, {key: `val'"ue`}])).toBe(
-      `'{1,"string",true,"2020-01-01T02:03:04.567Z","{\\"key\\":\\"val''\\\\"ue\\"}"}'`
+    expect(quote([1, 'string', true, date, { key: `val'"ue` }])).toBe(
+      `'{1,"string",true,"2020-01-01T02:03:04.567Z","{\\"key\\":\\"val''\\\\"ue\\"}"}'`,
     )
   })
 })

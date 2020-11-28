@@ -9,8 +9,7 @@ const toFloat = (value: Buffer, pos: number, size: number) =>
 const toIntFromBinary = (value: Buffer, pos: number, size: number) =>
   parseInt(value.toString(undefined, pos, pos + size), 2)
 
-const toBoolean = (value: Buffer) =>
-  value[0] === trueCode
+const toBoolean = (value: Buffer) => value[0] === trueCode
 
 const toDate = (value: Buffer, pos: number, size: number) =>
   new Date(value.toString(undefined, pos, pos + size))

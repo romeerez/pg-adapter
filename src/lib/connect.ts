@@ -1,10 +1,16 @@
-import {isIP} from 'net'
+import { isIP } from 'net'
 import tls from 'tls'
-import {Socket, ConnectionSettingType, PgError, ResultMode, Task} from '../types'
-import {encodeInt32} from './buffer'
-import {handleMessage} from './messageHandler'
-import {createTask, next} from './task'
-import {Adapter} from '../adapter'
+import {
+  Socket,
+  ConnectionSettingType,
+  PgError,
+  ResultMode,
+  Task,
+} from '../types'
+import { encodeInt32 } from './buffer'
+import { handleMessage } from './messageHandler'
+import { createTask, next } from './task'
+import { Adapter } from '../adapter'
 
 const checkSSLMessage = Buffer.alloc(8)
 encodeInt32(checkSSLMessage, 0, 8)
@@ -21,7 +27,11 @@ class Connect {
   settings: ConnectionSettingType
   task?: Task
 
-  constructor(adapter: Adapter, socket: Socket, settings: ConnectionSettingType) {
+  constructor(
+    adapter: Adapter,
+    socket: Socket,
+    settings: ConnectionSettingType,
+  ) {
     this.adapter = adapter
     this.socket = socket
     this.settings = settings
@@ -35,25 +45,26 @@ class Connect {
     })
   }
 
-  addTask(resolve: (socket: Socket) => any, reject: (err: PgError) => any) {
-    const {adapter} = this
+  addTask(resolve: (socket: Socket) => void, reject: (err: PgError) => void) {
+    const { adapter } = this
     const error: PgError = new Error()
     const task = createTask({
-      adapter, error, resolve, reject,
+      adapter,
+      error,
+      resolve: resolve as (...args: unknown[]) => void,
+      reject,
       mode: ResultMode.skip,
       query: 'Startup message',
       decodeTypes: {},
-      finish: this.finish
+      finish: this.finish,
     })
     this.task = task
     this.socket.task = task
   }
 
   socketConnect() {
-    const {port, host} = this.settings
-    return new Promise(resolve =>
-      this.socket.connect(port, host, resolve)
-    )
+    const { port, host } = this.settings
+    return new Promise((resolve) => this.socket.connect(port, host, resolve))
   }
 
   checkSSL() {
@@ -65,7 +76,10 @@ class Connect {
   }
 
   sslResponseHandler(data: Buffer, listener: (data: Buffer) => void) {
-    const {socket, settings: {host}} = this
+    const {
+      socket,
+      settings: { host },
+    } = this
     socket.removeListener('data', listener)
     const code = data[0]
     if (code === SSLCode) {
@@ -73,12 +87,12 @@ class Connect {
         socket,
         checkServerIdentity: tls.checkServerIdentity,
         rejectUnauthorized: false,
-        servername: isIP(host) === 0 ? host : undefined
+        servername: isIP(host) === 0 ? host : undefined,
       }
-      const {task} = this.socket
-      this.socket = tls.connect(options, () =>
-        this.sendStartupMessage()
-      ) as unknown as Socket
+      const { task } = this.socket
+      this.socket = (tls.connect(options, () =>
+        this.sendStartupMessage(),
+      ) as unknown) as Socket
       this.socket.task = task
       this.socket.prepared = {}
     } else {
@@ -87,10 +101,10 @@ class Connect {
   }
 
   sendStartupMessage() {
-    const {socket} = this
+    const { socket } = this
     handleMessage(socket, this.settings)
 
-    const {user, database} = this.settings
+    const { user, database } = this.settings
     const message = `user\0${user}\0database\0${database}\0\0`
     const len = 8 + Buffer.byteLength(message)
     const buf = Buffer.alloc(len)
@@ -103,8 +117,7 @@ class Connect {
   finish(socket: Socket, task: Task) {
     socket.task = undefined
 
-    if (task.failed)
-      task.reject(task.error)
+    if (task.failed) task.reject(task.error)
     else {
       task.resolve(socket)
       next(task.adapter, socket)
@@ -112,5 +125,8 @@ class Connect {
   }
 }
 
-export const connect = (adapter: Adapter, socket: Socket, settings: ConnectionSettingType) =>
-  new Connect(adapter, socket, settings).connect()
+export const connect = (
+  adapter: Adapter,
+  socket: Socket,
+  settings: ConnectionSettingType,
+) => new Connect(adapter, socket, settings).connect()

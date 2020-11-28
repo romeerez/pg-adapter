@@ -1,56 +1,65 @@
-import {AdapterProps, ConnectionSettingType, PgError, Log, ResultMode, Prepared} from './types'
-import {parseUrl} from './lib/parseUrl'
-import {connect} from './lib/connect'
-import {sync} from './lib/sync'
-import {close} from './lib/close'
-import {defaultDecodeTypes} from './lib/defaultDecodeTypes'
-import {AdapterBase} from './lib/adapterBase'
-import {transaction, wrapperTransaction, Transaction} from './lib/transaction'
-import {defaultLog} from './lib/log'
-import {prepare} from './lib/prepare'
+import {
+  AdapterProps,
+  ConnectionSettingType,
+  PgError,
+  Log,
+  ResultMode,
+  Prepared,
+} from './types'
+import { parseUrl } from './lib/parseUrl'
+import { connect } from './lib/connect'
+import { sync } from './lib/sync'
+import { close } from './lib/close'
+import { defaultDecodeTypes } from './lib/defaultDecodeTypes'
+import { AdapterBase } from './lib/adapterBase'
+import { transaction, wrapperTransaction, Transaction } from './lib/transaction'
+import { defaultLog } from './lib/log'
+import { prepare } from './lib/prepare'
 
-export {quote} from './lib/quote'
-export {sql} from './lib/sql'
-export {parseUrl} from './lib/parseUrl'
-export {Transaction, AdapterBase, AdapterProps, ResultMode, PgError, Prepared}
+export { quote } from './lib/quote'
+export { sql } from './lib/sql'
+export { parseUrl } from './lib/parseUrl'
+export { Transaction, AdapterBase, AdapterProps, ResultMode, PgError, Prepared }
 
 export class Adapter extends AdapterBase {
   static defaultLog: boolean | Log = defaultLog
 
   connectionSettings: ConnectionSettingType
   pool: number
-  connected: boolean = false
+  connected = false
 
   constructor({
-     host = '127.0.0.1',
-     port = 5432,
-     database = 'postgres',
-     user = process.env.USER || 'postgres',
-     password = '',
-     pool = 10,
-     log = Adapter.defaultLog,
-     decodeTypes,
+    host = '127.0.0.1',
+    port = 5432,
+    database = 'postgres',
+    user = process.env.USER || 'postgres',
+    password = '',
+    pool = 10,
+    log = Adapter.defaultLog,
+    decodeTypes,
   }: AdapterProps = {}) {
-    super({pool, decodeTypes: decodeTypes || defaultDecodeTypes, log})
+    super({ pool, decodeTypes: decodeTypes || defaultDecodeTypes, log })
     this.connectionSettings = {
-      host, port, database, user, password
+      host,
+      port,
+      database,
+      user,
+      password,
     }
     this.pool = pool
   }
 
-  static fromURL(
-    urlOrOptions?: string | AdapterProps,
-    options?: AdapterProps
-  ) {
+  static fromURL(urlOrOptions?: string | AdapterProps, options?: AdapterProps) {
     if (typeof urlOrOptions === 'object')
-      return new this({...parseUrl(process.env.DATABASE_URL), ...urlOrOptions})
-    else
-      return new this({...parseUrl(urlOrOptions), ...options})
+      return new this({
+        ...parseUrl(process.env.DATABASE_URL),
+        ...urlOrOptions,
+      })
+    else return new this({ ...parseUrl(urlOrOptions), ...options })
   }
 
   async connect() {
-    if (this.connected)
-      return
+    if (this.connected) return
 
     this.connected = true
     const promises = []
@@ -59,18 +68,19 @@ export class Adapter extends AdapterBase {
     this.sockets = await Promise.all(promises)
   }
 
-  sync = () =>
-    sync(this)
+  sync = () => sync(this)
 
-  close = () =>
-    close(this)
+  close = () => close(this)
 
-  transaction(fn?: (t: Transaction) => any) {
+  transaction(fn?: (t: Transaction) => void) {
     const error: PgError = new Error()
     return transaction(this, error, fn)
   }
 
-  wrapperTransaction(target: any, fn?: (t: typeof target & Transaction) => any) {
+  wrapperTransaction<T extends Record<string, unknown>>(
+    target: T,
+    fn?: (t: T & Transaction) => void,
+  ) {
     const error: PgError = new Error()
     return wrapperTransaction(this, error, target, fn)
   }
