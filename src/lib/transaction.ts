@@ -26,7 +26,7 @@ export const transaction = (
   return Promise.all(promises)
 }
 
-export const wrapperTransaction = <T extends Record<string, unknown>>(
+export const wrapperTransaction = <T>(
   adapter: AdapterBase,
   error: PgError,
   target: T,

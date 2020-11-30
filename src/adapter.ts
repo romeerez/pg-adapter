@@ -77,10 +77,7 @@ export class Adapter extends AdapterBase {
     return transaction(this, error, fn)
   }
 
-  wrapperTransaction<T extends Record<string, unknown>>(
-    target: T,
-    fn?: (t: T & Transaction) => void,
-  ) {
+  wrapperTransaction<T>(target: T, fn?: (t: T & Transaction) => void) {
     const error: PgError = new Error()
     return wrapperTransaction(this, error, target, fn)
   }
