@@ -1,7 +1,8 @@
 const singleQuoteRegex = /'/g
 const doubleQuoteRegex = /"/g
 
-export type Value = number | string | Date | null | undefined | Value[]
+// eslint-disable-next-line
+type Value = any
 
 const quoteValue = (value: Value): string => {
   const type = typeof value
