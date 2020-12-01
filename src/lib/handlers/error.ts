@@ -7,7 +7,7 @@ const charKeyCodes: {
   S: (error, message) => (error.level = message),
   M: (error, message) => (error.message = message),
   D: (error, message) => (error.details = message),
-  C: noop,
+  C: (error, message) => (error.code = message),
   H: (error, message) => (error.hint = message),
   P: (error, message) => (error.position = message),
   p: (error, message) => (error.innerPosition = message),

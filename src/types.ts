@@ -1,6 +1,9 @@
 import { Socket as NativeSocket } from 'net'
 import { AdapterBase } from './lib/adapterBase'
 import { Value } from './lib/quote'
+import { PgError as PgErrorClass } from './lib/error'
+
+export type PgError = PgErrorClass
 
 export interface Socket extends NativeSocket {
   task?: Task
@@ -31,26 +34,6 @@ export interface AdapterProps extends Partial<ConnectionSettingType> {
   pool?: number
   log?: boolean | Log
   decodeTypes?: DecodeTypes
-}
-
-export interface PgError extends Error {
-  message: string
-  query?: string
-  level?: string
-  details?: string
-  hint?: string
-  position?: string
-  innerPosition?: string
-  innerQuery?: string
-  trace?: string
-  schema?: string
-  table?: string
-  column?: string
-  dataType?: string
-  constraint?: string
-  file?: string
-  line?: string
-  process?: string
 }
 
 export interface AuthData {

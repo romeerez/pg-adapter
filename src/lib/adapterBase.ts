@@ -1,13 +1,6 @@
 import { Socket as NativeSocket } from 'net'
-import {
-  DecodeTypes,
-  PgError,
-  ResultMode,
-  Log,
-  Task,
-  Socket,
-  Prepared,
-} from '../types'
+import { DecodeTypes, ResultMode, Log, Task, Socket, Prepared } from '../types'
+import { PgError } from './error'
 import { addTaskToAdapter, createTask } from './task'
 import { sql2 } from './sql'
 import { defaultLog, noopLog } from './log'
@@ -55,7 +48,7 @@ export class AdapterBase {
       // eslint-disable-next-line
       if ((query as any).then) query = await query
 
-      const error: PgError = new Error()
+      const error = new PgError()
       const task = createTask({
         mode,
         error,

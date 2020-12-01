@@ -1,12 +1,7 @@
 import { isIP } from 'net'
 import tls from 'tls'
-import {
-  Socket,
-  ConnectionSettingType,
-  PgError,
-  ResultMode,
-  Task,
-} from '../types'
+import { Socket, ConnectionSettingType, ResultMode, Task } from '../types'
+import { PgError } from './error'
 import { encodeInt32 } from './buffer'
 import { handleMessage } from './messageHandler'
 import { createTask, next } from './task'
@@ -47,7 +42,7 @@ class Connect {
 
   addTask(resolve: (socket: Socket) => void, reject: (err: PgError) => void) {
     const { adapter } = this
-    const error: PgError = new Error()
+    const error = new PgError()
     const task = createTask({
       adapter,
       error,

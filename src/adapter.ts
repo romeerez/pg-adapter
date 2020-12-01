@@ -1,11 +1,11 @@
 import {
   AdapterProps,
   ConnectionSettingType,
-  PgError,
   Log,
   ResultMode,
   Prepared,
 } from './types'
+import { PgError } from './lib/error'
 import { parseUrl } from './lib/parseUrl'
 import { connect } from './lib/connect'
 import { sync } from './lib/sync'
@@ -73,12 +73,12 @@ export class Adapter extends AdapterBase {
   close = () => close(this)
 
   transaction(fn?: (t: Transaction) => void) {
-    const error: PgError = new Error()
+    const error = new PgError()
     return transaction(this, error, fn)
   }
 
   wrapperTransaction<T>(target: T, fn?: (t: T & Transaction) => void) {
-    const error: PgError = new Error()
+    const error = new PgError()
     return wrapperTransaction(this, error, target, fn)
   }
 

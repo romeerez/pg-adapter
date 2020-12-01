@@ -1,6 +1,7 @@
 import { AdapterBase } from './adapterBase'
 import { createTask, addTaskToAdapter, next } from './task'
-import { Socket, Task, ResultMode, PgError, Prepared } from '../types'
+import { Socket, Task, ResultMode, Prepared } from '../types'
+import { PgError } from './error'
 import { noop } from './buffer'
 import { Value } from './quote'
 
@@ -91,7 +92,7 @@ export class Transaction extends AdapterBase {
   }
 
   transaction() {
-    const error: PgError = new Error()
+    const error = new PgError()
     return transaction(this, error)
   }
 
