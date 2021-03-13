@@ -82,13 +82,10 @@ export interface Task<T = unknown> {
 export interface Prepared {
   sql: string
   name: string
-  performQuery: (
-    mode: ResultMode,
-    args: TemplateStringsArray | Value[],
-  ) => Promise<unknown>
-  query: (...args: TemplateStringsArray | Value[]) => Promise<unknown>
-  objects: (...args: TemplateStringsArray | Value[]) => Promise<unknown>
-  arrays: (...args: TemplateStringsArray | Value[]) => Promise<unknown>
-  value: (...args: TemplateStringsArray | Value[]) => Promise<unknown>
-  exec: (...args: TemplateStringsArray | Value[]) => Promise<unknown>
+  performQuery: (mode: ResultMode, args?: Value[]) => Promise<unknown>
+  query: (...args: Value[]) => Promise<unknown>
+  objects: (...args: Value[]) => Promise<unknown>
+  arrays: (...args: Value[]) => Promise<unknown>
+  value: (...args: Value[]) => Promise<unknown>
+  exec: (...args: Value[]) => Promise<unknown>
 }

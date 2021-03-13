@@ -135,30 +135,32 @@ describe('Adapter', () => {
 
     it('can load wide table data', async () => {
       const date = Date.UTC(2020, 0, 1)
-      const values = [
-        // {sql: 'null', value: null},
-        // {sql: '1', value: 1},
-        // {sql: '2', value: 2},
-        // {sql: '3', value: 3},
-        // {sql: '1.5', value: 1.5},
-        // {sql: '2.5', value: 2.5},
-        // {sql: '3.5', value: 3.5},
-        // {sql: 'false', value: false},
+      let values = [
+        { sql: 'null', value: null },
+        { sql: '1', value: 1 },
+        { sql: '2', value: 2 },
+        { sql: '3', value: 3 },
+        { sql: '1.5', value: 1.5 },
+        { sql: '2.5', value: 2.5 },
+        { sql: '3.5', value: 3.5 },
+        { sql: 'false', value: false },
         { sql: 'true', value: true },
-        // {sql: "'01.01.2020'::date", value: +date},
+        { sql: "'01.01.2020'::date", value: +date },
       ]
-      // for (let i = 0; i < 5; i++)
-      //   values = [...values, ...values]
+      for (let i = 0; i < 5; i++) values = [...values, ...values]
 
       const db = Adapter.fromURL({ pool: 1 })
       const rows = (await db.performQuery(
         ResultMode.arrays,
         `SELECT ${values.map((value) => value.sql)}`,
       )) as any[][]
+
       const row = rows[0]
+
       row.forEach((item, i) => {
         if (item?.constructor === Date) row[i] = +row[i]
       })
+
       expect(row).toEqual(values.map((value) => value.value))
       await db.close()
     })
@@ -287,13 +289,12 @@ describe('Adapter', () => {
   describe('prepared', () => {
     it('makes prepared statements', async () => {
       const db = Adapter.fromURL({ pool: 1 })
-      const q = db.prepare(
-        'queryName',
-        'text',
-        'integer',
-        'date',
-      )`SELECT $1 AS text, $2 AS integer, $3 AS date`
-      const result = await q.performQuery(0, ['text', 123, '01.01.2020'])
+      const q = db.prepare({
+        name: 'queryName',
+        args: ['text', 'integer', 'date'],
+        query: 'SELECT $1 AS text, $2 AS integer, $3 AS date',
+      })
+      const result = await q.query('text', 123, '01.01.2020')
       const date = Date.UTC(2020, 0, 1)
       expect(result).toEqual([
         { text: 'text', integer: 123, date: new Date(date) },

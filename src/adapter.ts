@@ -82,7 +82,15 @@ export class Adapter extends AdapterBase {
     return wrapperTransaction(this, error, target, fn)
   }
 
-  prepare(name: string, ...args: string[]) {
-    return prepare(this, name, ...args)
+  prepare({
+    name,
+    args,
+    query,
+  }: {
+    name: string
+    args: string[]
+    query: string
+  }) {
+    return prepare(this, name, args, query)
   }
 }
