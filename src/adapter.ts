@@ -15,7 +15,7 @@ import { AdapterBase } from './lib/adapterBase'
 import { transaction, wrapperTransaction, Transaction } from './lib/transaction'
 import { defaultLog } from './lib/log'
 import { prepare } from './lib/prepare'
-import { Value } from 'lib/quote'
+import { Value } from './lib/quote'
 
 export { quote, raw } from './lib/quote'
 export { sql } from './lib/sql'
