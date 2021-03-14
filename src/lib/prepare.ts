@@ -1,35 +1,32 @@
 import { AdapterBase } from './adapterBase'
 import { ResultMode, Prepared } from '../types'
-import { sql2 } from './sql'
 import { Value, quote } from './quote'
 
-export const prepare = (
+export const prepare = <Args extends Value[] = Value[]>(
   adapter: AdapterBase,
   name: string,
   args: string[],
   query: string,
-) => {
+): Prepared<Args> => {
   const arr: (number | string)[] = ['PREPARE "', name, '"']
   if (args.length) arr.push(`(${args.join(', ')})`)
   arr.push(' AS ', query)
 
-  const prepared = Object.create(adapter) as Prepared
+  const prepared = Object.create(adapter) as Prepared<Args>
   prepared.sql = arr.join('')
   prepared.name = name
-  prepared.performQuery = (mode: ResultMode, args?: Value[]) => {
+  prepared.performQuery = (mode, args) => {
     let sql = `EXECUTE "${name}"`
-    if (args?.length) sql += `(${(args as Value[]).map(quote).join(', ')})`
-    return adapter.performQuery(mode, sql, undefined, prepared)
+    if (args?.length) sql += `(${(args as Args).map(quote).join(', ')})`
+    return adapter.performQuery(mode, sql, undefined, prepared as Prepared)
   }
 
-  prepared.objects = (...args: Value[]) =>
+  prepared.objects = (args: Args) =>
     prepared.performQuery(ResultMode.objects, args)
-  prepared.arrays = (...args: Value[]) =>
+  prepared.arrays = (args: Args) =>
     prepared.performQuery(ResultMode.arrays, args)
-  prepared.value = (...args: Value[]) =>
-    prepared.performQuery(ResultMode.value, args)
-  prepared.exec = (...args: Value[]) =>
-    prepared.performQuery(ResultMode.skip, args)
+  prepared.value = (args: Args) => prepared.performQuery(ResultMode.value, args)
+  prepared.exec = (args: Args) => prepared.performQuery(ResultMode.skip, args)
   prepared.query = prepared.objects
 
   return (new Proxy(adapter, {

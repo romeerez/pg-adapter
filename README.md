@@ -48,20 +48,33 @@ Initializing from database url (Heroku compatible):
 ```js
 const db = Adapter.fromURL(
   'postgres://user:password@host:port/database',
-  {pool: 5, log: false}
+  { pool: 5, log: false } // second argument for options
 )
 ```
 
 If no url provided it will try `DATABASE_URL` env variable:
 
 ```js
+const db = Adapter.fromURL()
+
+// you can provide options
 const db = Adapter.fromURL({pool: 8})
 ```
 
 Url parsing function is available by importing:
 
 ```js
-import {parseURL} from 'pg-adapter'
+import { parseURL } from 'pg-adapter'
+
+const config = parseURL('postgres://user:password@localhost:5432/db-name')
+
+config === {
+  host: 'localhost',
+  port: 5432,
+  database: 'db-name',
+  user: 'user',
+  password: 'password'
+}
 ```
 
 ## Making queries
@@ -214,47 +227,56 @@ Null from db won't get to parser.
 
 ## Transactions
 
+`db.transaction` wraps your function with try-catch, and waits till all queries in function will finish, even non-awaited queries.
+When all queries in transaction completes it will send commit query.
+When error happens it will send rollback query.
+You can use `t.commit()` and `t.rollback()` in transaction, then it won't do that automatically.
+
 ```js
+// This transaction will wait for both queries and commit
 await db.transaction(async t => {
-  // try-catch is done in transaction function
   await t.exec('you can use await')
   t.exec('or just queries')
-  t.exec('without await')
-  // commit automatically
+})
+
+await db.transaction(async t => {
+  await t.exec('do something')
+  await t.commit()
+  console.log('transaction was committed')
+})
+
+await db.transaction(async t => {
+  await t.exec('do something')
+  await t.rollback()
+  console.log('transaction was rolled back')
 })
 ```
 
 ## Prepared statements
 
-Prepared statement is query which get parsed and planned just once and then can be called many times.
+Prepared statement is query which get parsed and planned just once **per connection** and then can be called many times.
 
 Such query is bit faster.
 
 ```js
-const usersQuery = db.prepare('usersQuery', 'text', 'integer', 'date')
-  `SELECT * FROM users WHERE name = $1 AND age = $2 AND last_activity >= $3`
-```
+// provide array of TS types
+const usersQuery = db.prepare<[string, number, Date]>({
+  // name of query, must be unique
+  name: 'usersQuery',
+  // SQL types of arguments
+  args: ['text', 'integer', 'date'],
+  // query with positional arguments
+  query: 'SELECT * FROM users WHERE name = $1 AND age = $2 AND last_activity >= $3'
+})
 
-First argument is query name which must be unique, then query parameter types.
-SQL is passed outside of `()` i.e db.prepare(name, ...args)`sql query`,
-yes it looks strange, but that's how JS template strings works.
-
-So, query can have interpolated args `${someValue}` which gets escaped.
-
-```js
 const name = 'David'
 const age = 74
-const users = await usersQuery.query`${name}, ${age}, now() - interval '1 year'`
+// can be used with Date value
+const users = await usersQuery.query([name, age, new Date()])
+
+// you can send SQL argument with db.raw
+const users = await usersQuery.query([name, age, db.raw("now() - interval '1 year'")])
 ```
-
-Here again template string is used so two values escapes and last parameter is SQL statement.
-
-```js
-usersQuery.query(1, 2, "now() - interval '1 year'")
-```
-
-This will not work because sql will be escaped.
-But if you don't need sql in parameter it will work fine.
 
 ## Sync
 

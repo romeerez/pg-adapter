@@ -15,8 +15,9 @@ import { AdapterBase } from './lib/adapterBase'
 import { transaction, wrapperTransaction, Transaction } from './lib/transaction'
 import { defaultLog } from './lib/log'
 import { prepare } from './lib/prepare'
+import { Value } from 'lib/quote'
 
-export { quote } from './lib/quote'
+export { quote, raw } from './lib/quote'
 export { sql } from './lib/sql'
 export { parseUrl } from './lib/parseUrl'
 export { Transaction, AdapterBase, AdapterProps, ResultMode, PgError, Prepared }
@@ -82,7 +83,7 @@ export class Adapter extends AdapterBase {
     return wrapperTransaction(this, error, target, fn)
   }
 
-  prepare({
+  prepare<Args extends Value[] = Value[]>({
     name,
     args,
     query,
@@ -91,6 +92,6 @@ export class Adapter extends AdapterBase {
     args: string[]
     query: string
   }) {
-    return prepare(this, name, args, query)
+    return prepare<Args>(this, name, args, query)
   }
 }

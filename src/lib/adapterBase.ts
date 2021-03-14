@@ -5,6 +5,7 @@ import { addTaskToAdapter, createTask } from './task'
 import { sql2 } from './sql'
 import { defaultLog, noopLog } from './log'
 import { Value } from './quote'
+import { quote, raw } from './quote'
 
 export class AdapterBase {
   sockets: Socket[]
@@ -12,6 +13,8 @@ export class AdapterBase {
   log: Log
   task?: Task
   lastTask?: Task
+  quote = quote
+  raw = raw
 
   constructor({
     pool,

@@ -61,7 +61,7 @@ export interface ParseInfo {
   columnsCount?: number
 }
 
-export interface Task<T = unknown> {
+export interface Task<T = unknown, PreparedArgs extends Value[] = Value[]> {
   adapter: AdapterBase
   mode: ResultMode
   error: PgError
@@ -76,16 +76,16 @@ export interface Task<T = unknown> {
   parseInfo: ParseInfo
   next?: Task<T>
   last?: Task<T>
-  prepared?: Prepared
+  prepared?: Prepared<PreparedArgs>
 }
 
-export interface Prepared {
+export interface Prepared<Args extends Value[] = Value[]> {
   sql: string
   name: string
-  performQuery: (mode: ResultMode, args?: Value[]) => Promise<unknown>
-  query: (...args: Value[]) => Promise<unknown>
-  objects: (...args: Value[]) => Promise<unknown>
-  arrays: (...args: Value[]) => Promise<unknown>
-  value: (...args: Value[]) => Promise<unknown>
-  exec: (...args: Value[]) => Promise<unknown>
+  performQuery: (mode: ResultMode, args?: Args) => Promise<unknown>
+  query: (args: Args) => Promise<unknown>
+  objects: (args: Args) => Promise<unknown>
+  arrays: (args: Args) => Promise<unknown>
+  value: (args: Args) => Promise<unknown>
+  exec: (args: Args) => Promise<unknown>
 }

@@ -9,6 +9,7 @@ import {
   Prepared,
 } from '../types'
 import { encodeInt32 } from './buffer'
+import { Value } from 'lib/quote'
 
 type RequiredParams = {
   adapter: AdapterBase

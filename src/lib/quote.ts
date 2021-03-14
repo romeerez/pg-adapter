@@ -15,6 +15,7 @@ const quoteValue = (value: Value): string => {
   else if (value instanceof Date) return `"${value.toISOString()}"`
   else if (Array.isArray(value)) return quoteArray(value)
   else if (type === null || type === undefined) return 'NULL'
+  else if (typeof value.__raw === 'string') return value.__raw
   else
     return `"${JSON.stringify(value)
       .replace(doubleQuoteRegex, '\\"')
@@ -32,5 +33,9 @@ export const quote = (value: Value): string => {
   else if (value instanceof Date) return `'${value.toISOString()}'`
   else if (Array.isArray(value)) return quoteArray(value)
   else if (value === null || value === undefined) return 'NULL'
+  else if (typeof value.__raw === 'string') return value.__raw
   else return `'${JSON.stringify(value).replace(singleQuoteRegex, "''")}'`
 }
+
+// eslint-disable-next-line
+export const raw = (value: string): any => ({ __raw: value })
