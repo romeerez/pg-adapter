@@ -6,7 +6,7 @@ Why another adapter for Postgresql?
 There is already `pg`, it's popular, has community. 
 
 Well, this adapter may seem more convenient and faster in microbenchmarks
-(faster then pg-native too, for single connection and pool, bench: https://gitlab.com/snippets/1945002).
+Microbenchmark vs `pg` vs `pg-native`: https://gist.github.com/romeerez/b3e45d9afffefe0f286046223dabb7e1
 
 It's written on Typescript so examples are also on it.
 
