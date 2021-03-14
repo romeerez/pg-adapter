@@ -1,12 +1,15 @@
 {
   "name": "pg-adapter",
-  "version": "1.1.58",
+  "version": "1.2.0",
   "description": "Efficient and usable Postgresql client with pool",
   "main": "dist/adapter.js",
   "files": [
     "dist"
   ],
-  "repository": "https://github.com/romeerez/pg-adapter",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/romeerez/pg-adapter.git"
+  },
   "author": "Roman Kushyn",
   "license": "MIT",
   "keywords": [
@@ -42,5 +45,12 @@
     "prettier": "^2.2.1",
     "ts-jest": "^25.3.1",
     "typescript": "^3.8.3"
+  },
+  "bugs": {
+    "url": "https://github.com/romeerez/pg-adapter/issues"
+  },
+  "homepage": "https://github.com/romeerez/pg-adapter#readme",
+  "directories": {
+    "test": "test"
   }
 }

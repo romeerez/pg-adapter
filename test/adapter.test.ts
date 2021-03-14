@@ -289,15 +289,18 @@ describe('Adapter', () => {
   describe('prepared', () => {
     it('makes prepared statements', async () => {
       const db = Adapter.fromURL({ pool: 1 })
-      const q = db.prepare({
+
+      const q = db.prepare<[string, number, Date, Date]>({
         name: 'queryName',
-        args: ['text', 'integer', 'date'],
-        query: 'SELECT $1 AS text, $2 AS integer, $3 AS date',
+        args: ['text', 'integer', 'date', 'date'],
+        query: 'SELECT $1 AS text, $2 AS integer, $3 AS date, $4 AS sql_date',
       })
-      const result = await q.query('text', 123, '01.01.2020')
-      const date = Date.UTC(2020, 0, 1)
+
+      const date = new Date(Date.UTC(2020, 0, 1))
+      const result = await q.query(['text', 123, date, db.raw("'01.01.2020'")])
+
       expect(result).toEqual([
-        { text: 'text', integer: 123, date: new Date(date) },
+        { text: 'text', integer: 123, date, sql_date: date },
       ])
       await db.close()
     })
