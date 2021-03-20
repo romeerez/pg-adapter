@@ -135,8 +135,8 @@ export class Transaction extends AdapterBase {
 
   performQuery(
     mode: ResultMode,
-    query: string | TemplateStringsArray,
-    args?: TemplateStringsArray | Value[],
+    query: string | Promise<string>,
+    args?: Value,
     prepared?: Prepared,
   ) {
     const promise = super.performQuery(mode, query, args, prepared)

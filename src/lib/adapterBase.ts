@@ -2,10 +2,10 @@ import { Socket as NativeSocket } from 'net'
 import { DecodeTypes, ResultMode, Log, Task, Socket, Prepared } from '../types'
 import { PgError } from './error'
 import { addTaskToAdapter, createTask } from './task'
-import { sql2 } from './sql'
 import { defaultLog, noopLog } from './log'
 import { Value } from './quote'
 import { quote, raw } from './quote'
+import interpolate from './interpolate'
 
 export class AdapterBase {
   sockets: Socket[]
@@ -42,8 +42,8 @@ export class AdapterBase {
 
   performQuery(
     mode: ResultMode,
-    query: string | TemplateStringsArray | Promise<string>,
-    args?: TemplateStringsArray | Value[],
+    query: string | Promise<string>,
+    args?: Value,
     prepared?: Prepared,
   ) {
     this.connect()
@@ -59,45 +59,30 @@ export class AdapterBase {
         reject,
         prepared,
         adapter: this,
-        query: sql2(query as string | TemplateStringsArray, args),
+        query: interpolate(query as string, args),
         decodeTypes: this.decodeTypes,
       })
       addTaskToAdapter(this, task)
     })
   }
 
-  query(
-    sql: string | TemplateStringsArray | Promise<string>,
-    ...args: TemplateStringsArray | Value[]
-  ) {
+  query(sql: string | Promise<string>, args?: Value) {
     return this.performQuery(ResultMode.objects, sql, args)
   }
 
-  objects(
-    sql: string | TemplateStringsArray | Promise<string>,
-    ...args: TemplateStringsArray | Value[]
-  ) {
+  objects(sql: string | Promise<string>, args?: Value) {
     return this.performQuery(ResultMode.objects, sql, args)
   }
 
-  arrays(
-    sql: string | TemplateStringsArray | Promise<string>,
-    ...args: TemplateStringsArray | Value[]
-  ) {
+  arrays(sql: string | Promise<string>, args?: Value) {
     return this.performQuery(ResultMode.arrays, sql, args)
   }
 
-  value(
-    sql: string | TemplateStringsArray | Promise<string>,
-    ...args: TemplateStringsArray | Value[]
-  ) {
+  value(sql: string | Promise<string>, args?: Value) {
     return this.performQuery(ResultMode.value, sql, args)
   }
 
-  exec(
-    sql: string | TemplateStringsArray | Promise<string>,
-    ...args: TemplateStringsArray | Value[]
-  ) {
+  exec(sql: string | Promise<string>, args?: Value) {
     return this.performQuery(ResultMode.skip, sql, args)
   }
 }

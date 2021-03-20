@@ -18,7 +18,6 @@ import { prepare } from './lib/prepare'
 import { Value } from './lib/quote'
 
 export { quote, raw } from './lib/quote'
-export { sql } from './lib/sql'
 export { parseUrl } from './lib/parseUrl'
 export { Transaction, AdapterBase, AdapterProps, ResultMode, PgError, Prepared }
 

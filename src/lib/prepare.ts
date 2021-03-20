@@ -21,12 +21,14 @@ export const prepare = <Args extends Value[] = Value[]>(
     return adapter.performQuery(mode, sql, undefined, prepared as Prepared)
   }
 
-  prepared.objects = (args: Args) =>
+  prepared.objects = (...args: Args) =>
     prepared.performQuery(ResultMode.objects, args)
-  prepared.arrays = (args: Args) =>
+  prepared.arrays = (...args: Args) =>
     prepared.performQuery(ResultMode.arrays, args)
-  prepared.value = (args: Args) => prepared.performQuery(ResultMode.value, args)
-  prepared.exec = (args: Args) => prepared.performQuery(ResultMode.skip, args)
+  prepared.value = (...args: Args) =>
+    prepared.performQuery(ResultMode.value, args)
+  prepared.exec = (...args: Args) =>
+    prepared.performQuery(ResultMode.skip, args)
   prepared.query = prepared.objects
 
   return (new Proxy(adapter, {

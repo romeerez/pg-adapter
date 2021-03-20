@@ -13,7 +13,7 @@ It's written on Typescript so examples are also on it.
 ## Table of Contents
 * [Getting started](#getting-started)
 * [Making queries](#making-queries)
-* [Escape values](#escape-values)
+* [Query variables](#query-variables)
 * [Pool](#pool)
 * [Log](#log)
 * [Errors](#errors)
@@ -104,37 +104,6 @@ const nothing = await db.exec('TRUNCATE TABLE users CASCADE')
 await db.close() // it will wait till all queries finish
 ```
 
-## Escape values
-
-Queries can handle escaping by themselves using template strings:
-
-```js
-const rawValue = 'may contain sql injection'
-
-// quoted value is safe:
-db.query`SELECT * FROM table WHERE a = ${rawValue}`
-// spaces on start and end will be trimmed
-```
-
-Better to use `sql` function, then the editor can highlight syntax:
-
-```js
-import {sql} from 'pg-adapter'
-
-const value = 'value'
-const safeSql = sql`SELECT * FROM table WHERE a = ${value}`
-```
-
-For escaping single value there is `quote`:
-
-```js
-import {quote} from 'pg-adapter'
-
-const value = 'value'
-const safeSqlValue = quote(value)
-const dbHasIt = db.quote(value)
-```
-
 You can send multiple queries and receive array of results.
 In general, I don't recommend it, but if you have small pool size and many clients
 it can be efficient.
@@ -154,6 +123,34 @@ If Promise passed instead of string it will wait for it automatically:
 
 ```typescript
 const result = await db.query(Promise.resolve('SELECT 1'))
+```
+
+## Query variables
+
+[pg-promise](https://github.com/vitaly-t/pg-promise) library is included.
+
+Second parameter of `query` and of other methods is handled by pg-promise:
+
+```typescript
+await db.query('SELECT * FROM table WHERE a = $1 AND b = $2', [1, 2])
+```
+
+To insert multiple values at once you can use pg-promise and pg-adapter in such way:
+```typescript
+import pgPromise from 'pg-promise'
+
+const pgp = pgPromise({
+  capSQL: true,
+})
+
+await db.query(
+  pgp.helpers.insert(
+    [{ name: 'first' }, { name: 'second' }],
+    ['name'],
+    'my-table',
+  )
+)
+// INSERT INTO "my-table"("name") VALUES('first'),('second')
 ```
 
 ## Pool
@@ -272,10 +269,10 @@ const usersQuery = db.prepare<[string, number, Date]>({
 const name = 'David'
 const age = 74
 // can be used with Date value
-const users = await usersQuery.query([name, age, new Date()])
+const users = await usersQuery.query(name, age, new Date())
 
 // you can send SQL argument with db.raw
-const users = await usersQuery.query([name, age, db.raw("now() - interval '1 year'")])
+const users = await usersQuery.query(name, age, db.raw("now() - interval '1 year'"))
 ```
 
 ## Sync

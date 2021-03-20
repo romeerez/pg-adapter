@@ -203,8 +203,6 @@ describe('Adapter', () => {
       const db = Adapter.fromURL({ pool: 1 })
       const one = await db.objects('SELECT 1 as one')
       expect(one).toEqual([{ one: 1 }])
-      const two = await db.objects`SELECT ${'string'} as one`
-      expect(two).toEqual([{ one: 'string' }])
       await db.close()
     })
   })
@@ -214,8 +212,6 @@ describe('Adapter', () => {
       const db = Adapter.fromURL({ pool: 1 })
       const one = await db.arrays('SELECT 1 as one')
       expect(one).toEqual([[1]])
-      const two = await db.arrays`SELECT ${'string'} as one`
-      expect(two).toEqual([['string']])
       await db.close()
     })
   })
@@ -225,8 +221,6 @@ describe('Adapter', () => {
       const db = Adapter.fromURL({ pool: 1 })
       const one = await db.value('SELECT 1 as one')
       expect(one).toEqual(1)
-      const two = await db.value`SELECT ${'string'} as one`
-      expect(two).toEqual('string')
       await db.close()
     })
   })
@@ -236,8 +230,6 @@ describe('Adapter', () => {
       const db = Adapter.fromURL({ pool: 1 })
       const one = await db.exec('SELECT 1 as one')
       expect(one).toEqual(undefined)
-      const two = await db.exec`SELECT ${'string'} as one`
-      expect(two).toEqual(undefined)
       await db.close()
     })
   })
@@ -297,7 +289,7 @@ describe('Adapter', () => {
       })
 
       const date = new Date(Date.UTC(2020, 0, 1))
-      const result = await q.query(['text', 123, date, db.raw("'01.01.2020'")])
+      const result = await q.query('text', 123, date, db.raw("'01.01.2020'"))
 
       expect(result).toEqual([
         { text: 'text', integer: 123, date, sql_date: date },

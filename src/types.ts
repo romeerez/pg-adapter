@@ -83,9 +83,9 @@ export interface Prepared<Args extends Value[] = Value[]> {
   sql: string
   name: string
   performQuery: (mode: ResultMode, args?: Args) => Promise<unknown>
-  query: (args: Args) => Promise<unknown>
-  objects: (args: Args) => Promise<unknown>
-  arrays: (args: Args) => Promise<unknown>
-  value: (args: Args) => Promise<unknown>
-  exec: (args: Args) => Promise<unknown>
+  query: (...args: Args) => Promise<unknown>
+  objects: (...args: Args) => Promise<unknown>
+  arrays: (...args: Args) => Promise<unknown>
+  value: (...args: Args) => Promise<unknown>
+  exec: (...args: Args) => Promise<unknown>
 }
