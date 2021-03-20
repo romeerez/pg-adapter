@@ -1,8 +1,8 @@
 import { noop } from '../buffer'
-import { Task, PgError } from '../../types'
+import { Task, PgNotice } from '../../types'
 
 const charKeyCodes: {
-  [key: string]: (error: PgError, message: string) => void
+  [key: string]: (error: PgNotice, message: string) => void
 } = {
   S: (error, message) => (error.level = message),
   M: (error, message) => (error.message = message),
@@ -24,7 +24,7 @@ const charKeyCodes: {
   V: noop,
 }
 
-const codes: { [key: string]: (error: PgError, message: string) => void } = {}
+const codes: { [key: string]: (error: PgNotice, message: string) => void } = {}
 
 for (const code in charKeyCodes) {
   codes[code.charCodeAt(0)] = charKeyCodes[code]
@@ -32,7 +32,7 @@ for (const code in charKeyCodes) {
 }
 
 export const parseError = (task: Task, data: Buffer, pos: number) => {
-  const error = {} as PgError
+  const error = {} as PgNotice
   pos += 5
   const len = data.length
   error.query = task.query
@@ -47,6 +47,5 @@ export const parseError = (task: Task, data: Buffer, pos: number) => {
     codes[code](error, String(data.slice(pos + 1, nextPos - 1)))
     pos = nextPos
   }
-  task.failed = true
-  return Object.assign(task.error, error)
+  return error
 }

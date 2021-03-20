@@ -2,7 +2,7 @@ import { Task, Creds, Socket } from '../types'
 import { getMessageLength, skipMessage } from './buffer'
 import { auth } from './handlers/auth'
 import { complete } from './handlers/complete'
-import { parseError } from './handlers/error'
+import { parseError } from './handlers/errorOrNotice'
 import { parseDescription } from './handlers/parseDescription'
 import { parseRow } from './handlers/parseRow'
 
@@ -85,12 +85,15 @@ const listener = (
       parseDescription(socket, task, data, pos)
     } else if (code === codes.readyForQueryCode) {
       return task.finish(socket, task)
-    } else if (
-      code === codes.errorResponseCode ||
-      code === codes.noticeResponseCode
-    ) {
-      const { level } = parseError(task, data, pos)
-      if (level !== 'ERROR') return task.finish(socket, task)
+    } else if (code === codes.errorResponseCode) {
+      const error = parseError(task, data, pos)
+      task.failed = true
+      Object.assign(task.error, error)
+      if (error.level !== 'ERROR') return task.finish(socket, task)
+    } else if (code === codes.noticeResponseCode) {
+      const notice = parseError(task, data, pos)
+      if (!task.notices) task.notices = [notice]
+      else task.notices.push(notice)
     } else if (code === codes.authenticationCode) {
       auth(socket, task, creds, data, pos)
     } else if (code === codes.commandCompleteCode) {

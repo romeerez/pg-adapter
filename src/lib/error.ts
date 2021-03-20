@@ -1,4 +1,6 @@
-export class PgError extends Error {
+import { PgNotice } from '../types'
+
+export class PgError extends Error implements PgNotice {
   message: string
   code: string
   query?: string

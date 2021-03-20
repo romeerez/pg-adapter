@@ -3,6 +3,27 @@ import { AdapterBase } from './lib/adapterBase'
 import { Value } from './lib/quote'
 import { PgError as PgErrorClass } from './lib/error'
 
+export interface PgNotice {
+  message: string
+  code: string
+  query?: string
+  level?: string
+  details?: string
+  hint?: string
+  position?: string
+  innerPosition?: string
+  innerQuery?: string
+  trace?: string
+  schema?: string
+  table?: string
+  column?: string
+  dataType?: string
+  constraint?: string
+  file?: string
+  line?: string
+  process?: string
+}
+
 export type PgError = PgErrorClass
 
 export interface Socket extends NativeSocket {
@@ -77,6 +98,7 @@ export interface Task<T = unknown, PreparedArgs extends Value[] = Value[]> {
   next?: Task<T>
   last?: Task<T>
   prepared?: Prepared<PreparedArgs>
+  notices?: PgNotice[]
 }
 
 export interface Prepared<Args extends Value[] = Value[]> {
