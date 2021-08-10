@@ -20,7 +20,7 @@ export const prepare = (adapter: AdapterBase, name: string, ...args: any[]) => {
     const prepared = Object.create(adapter) as Prepared
     prepared.sql = arr.join('')
     prepared.name = name
-    prepared.performQuery = (mode: ResultMode, args: any[]) => {
+    prepared.performQuery = (mode: ResultMode, args: any[], getFieldsInfo?: boolean) => {
       let sql = `EXECUTE ${name}`
       if (args && args.length) {
         const parts = args[0]
@@ -29,14 +29,18 @@ export const prepare = (adapter: AdapterBase, name: string, ...args: any[]) => {
         else
           sql += `(${args.map(quote).join(', ')})`
       }
-      return adapter.performQuery(mode, sql, undefined, prepared)
+      return adapter.performQuery(mode, sql, undefined, prepared, getFieldsInfo)
     }
 
     prepared.objects = (...args: any[]) => prepared.performQuery(ResultMode.objects, args)
+    prepared.objectsWithFields = (...args: any[]) => prepared.performQuery(ResultMode.objects, args, true)
     prepared.arrays = (...args: any[]) => prepared.performQuery(ResultMode.arrays, args)
+    prepared.arraysWithFields = (...args: any[]) => prepared.performQuery(ResultMode.arrays, args, true)
     prepared.value = (...args: any[]) => prepared.performQuery(ResultMode.value, args)
+    prepared.valueWithFields = (...args: any[]) => prepared.performQuery(ResultMode.value, args, true)
     prepared.exec = (...args: any[]) => prepared.performQuery(ResultMode.skip, args)
     prepared.query = prepared.objects
+    prepared.queryWithFields = prepared.objectsWithFields
 
     return new Proxy(adapter, {
       get: (target, name) => (prepared as any)[name] || (adapter as any)[name]

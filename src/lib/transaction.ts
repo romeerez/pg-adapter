@@ -51,7 +51,7 @@ export class Transaction extends AdapterBase {
     this.error = error
     this.resolve = noop
     this.reject = noop
-    this.promise = new Promise((resolve, reject) => {
+    this.promise = new Promise<void>((resolve, reject) => {
       this.resolve = resolve
       this.reject = reject
     })
@@ -126,8 +126,8 @@ export class Transaction extends AdapterBase {
     next(transaction.adapter, socket)
   }
 
-  performQuery(mode: ResultMode, query: string | TemplateStringsArray, args?: any[], prepared?: Prepared) {
-    const promise = super.performQuery(mode, query, args, prepared)
+  performQuery(mode: ResultMode, query: string | TemplateStringsArray, args?: any[], prepared?: Prepared, getFieldsInfo?: boolean) {
+    const promise = super.performQuery(mode, query, args, prepared, getFieldsInfo)
     promise.catch(this.catch)
     return promise
   }

@@ -1,6 +1,8 @@
 import {Socket as NativeSocket} from 'net'
 import {AdapterBase} from './lib/adapterBase'
 
+export type ResultWithFields<T = any> = { fields: FieldInfo[], result: T }
+
 export interface Socket extends NativeSocket {
   task?: Task,
   dataListener?: (data: Buffer) => any,
@@ -68,6 +70,16 @@ export enum ResultMode {
   skip = 3,
 }
 
+export type FieldInfo = {
+  name: string
+  tableID: number
+  columnID: number
+  dataTypeID: number
+  dataTypeSize: number
+  dataTypeModifier: number
+  format: number
+}
+
 export interface ParseInfo {
   resultNumber: number,
   skipNextValues: boolean,
@@ -75,6 +87,7 @@ export interface ParseInfo {
   names?: Array<string>,
   types?: Uint32Array,
   columnsCount?: number,
+  fieldsInfo?: FieldInfo[]
 }
 
 export interface Task {
@@ -86,10 +99,11 @@ export interface Task {
   reject: (err: PgError) => any,
   finish: (socket: Socket, task: Task) => any,
   decodeTypes: DecodeTypes,
+  parseInfo: ParseInfo,
+  getFieldsInfo?: boolean
   failed?: boolean,
   authData?: AuthData,
   result?: any[] | undefined,
-  parseInfo: ParseInfo,
   next?: Task,
   last?: Task,
   prepared?: Prepared,
@@ -98,10 +112,14 @@ export interface Task {
 export interface Prepared {
   sql: string,
   name: string,
-  performQuery: (mode: ResultMode, args: any[]) => Promise<any>,
-  query: (...args: any[]) => Promise<any>
-  objects: (...args: any[]) => Promise<any>
-  arrays: (...args: any[]) => Promise<any>
-  value: (...args: any[]) => Promise<any>
-  exec: (...args: any[]) => Promise<any>
+  performQuery<T = any>(mode: ResultMode, args: any[], getFieldsInfo?: boolean): Promise<T>,
+  query<T = any>(...args: any[]): Promise<T>
+  queryWithFields<T = any>(...args: any[]): Promise<ResultWithFields<T>>
+  objects<T = any>(...args: any[]): Promise<T>
+  objectsWithFields<T = any>(...args: any[]): Promise<ResultWithFields<T>>
+  arrays<T = any>(...args: any[]): Promise<T>
+  arraysWithFields<T = any>(...args: any[]): Promise<ResultWithFields<T>>
+  value<T = any>(...args: any[]): Promise<T>
+  valueWithFields<T = any>(...args: any[]): Promise<ResultWithFields<T>>
+  exec<T = any>(...args: any[]): Promise<T>
 }

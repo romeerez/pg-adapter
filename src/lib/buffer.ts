@@ -11,6 +11,9 @@ export const decodeInt32 = (data: Buffer, i: number) =>
 export const decodeInt16 = (data: Buffer, i: number) =>
   data[i + 1] + (data[i] << 8)
 
+export const isPositiveInt16 = (data: Buffer, i: number) =>
+  data[i] !== 255
+
 export const getMessageLength = (data: Buffer, pos: number) =>
   decodeInt32(data, pos + 1)
 

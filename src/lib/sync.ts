@@ -5,7 +5,7 @@ export const sync = ({lastTask: last}: {lastTask?: Task}) => {
     return
 
   const {finish} = last as Task
-  return new Promise(resolve => {
+  return new Promise<void>(resolve => {
     last.finish = (socket: Socket, task: Task) => {
       finish(socket, task)
       resolve()

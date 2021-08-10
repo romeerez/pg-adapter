@@ -16,12 +16,22 @@ const finishTask = (socket: Socket, task: Task) => {
   const {adapter} = task
   const {prepared} = task
   const prepareReady = prepared && !socket.prepared[prepared.name]
+
   if (!prepareReady)
     adapter.log.finish(socket, task)
+
   if (task.failed)
     task.reject(task.error)
-  else if (!prepareReady)
-    task.resolve(task.result)
+  else if (!prepareReady) {
+    task.resolve(
+      task.getFieldsInfo
+        ? {
+            fields: task.parseInfo.fieldsInfo || [],
+            result: task.result
+          }
+        : task.result
+    )
+  }
 
   socket.task = undefined
 
@@ -41,9 +51,18 @@ const finishTask = (socket: Socket, task: Task) => {
 }
 
 export const createTask: (params: Partial<Task> & RequiredParams) => Task = ({
-  adapter, mode, query, error, decodeTypes, prepared, resolve, reject, finish = finishTask
+  adapter, mode, query, error, decodeTypes, prepared, getFieldsInfo, resolve, reject, finish = finishTask
 }) => ({
-  adapter, mode, query, error, decodeTypes, prepared, resolve, reject, finish,
+  adapter,
+  mode,
+  query,
+  error,
+  decodeTypes,
+  prepared,
+  getFieldsInfo,
+  resolve,
+  reject,
+  finish,
   parseInfo: {
     resultNumber: 0,
     skipNextValues: false

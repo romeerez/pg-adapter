@@ -1,6 +1,7 @@
 import {Adapter, Transaction} from '../src/adapter'
-import {ResultMode} from '../src/types'
+import {FieldInfo, ResultMode} from '../src/types'
 import {defaultLog, noopLog} from '../src/lib/log'
+import 'dotenv/config'
 
 Adapter.defaultLog = false
 
@@ -45,16 +46,16 @@ describe('Adapter', () => {
   })
 
   describe('fromURL', () => {
-    let envDbUrl: string | undefined
+    let envDbUrl: string
     beforeAll(() => {
-      envDbUrl = process.env.DATABASE_URL
+      envDbUrl = process.env.DATABASE_URL as string
     })
     afterAll(() => {
       process.env.DATABASE_URL = envDbUrl
     })
 
     it('initialize Adapter using string url', () => {
-      process.env.DATABASE_URL = undefined
+      delete process.env.DATABASE_URL
       expect(() => Adapter.fromURL()).toThrow()
 
       const config = {
@@ -69,7 +70,7 @@ describe('Adapter', () => {
       process.env.DATABASE_URL = url
       expect(Adapter.fromURL().connectionSettings).toMatchObject(config)
 
-      process.env.DATABASE_URL = undefined
+      delete process.env.DATABASE_URL
       expect(Adapter.fromURL(url).connectionSettings).toMatchObject(config)
     })
   })
@@ -181,37 +182,55 @@ describe('Adapter', () => {
     })
   })
 
-  describe('objects', () => {
-    it('return objects', async () => {
-      const db = Adapter.fromURL({pool: 1})
-      const one = await db.objects('SELECT 1 as one')
-      expect(one).toEqual([{one: 1}])
-      const two = await db.objects`SELECT ${'string'} as one`
-      expect(two).toEqual([{one: 'string'}])
-      await db.close()
-    })
+  test('objects', async () => {
+    const db = Adapter.fromURL({pool: 1})
+    const one = await db.objects('SELECT 1 as one')
+    expect(one).toEqual([{one: 1}])
+    const two = await db.objects`SELECT ${'string'} as one`
+    expect(two).toEqual([{one: 'string'}])
+    await db.close()
   })
 
-  describe('arrays', () => {
-    it('return arrays', async () => {
-      const db = Adapter.fromURL({pool: 1})
-      const one = await db.arrays('SELECT 1 as one')
-      expect(one).toEqual([[1]])
-      const two = await db.arrays`SELECT ${'string'} as one`
-      expect(two).toEqual([['string']])
-      await db.close()
-    })
+  test('objectsWithFields', async () => {
+    const db = Adapter.fromURL({pool: 1})
+    const one = await db.objectsWithFields('SELECT 1 as one')
+    testField(one.fields[0])
+    expect(one.result).toEqual([{one: 1}])
+    await db.close()
   })
 
-  describe('value', () => {
-    it('return value', async () => {
-      const db = Adapter.fromURL({pool: 1})
-      const one = await db.value('SELECT 1 as one')
-      expect(one).toEqual(1)
-      const two = await db.value`SELECT ${'string'} as one`
-      expect(two).toEqual('string')
-      await db.close()
-    })
+  test('arrays', async () => {
+    const db = Adapter.fromURL({pool: 1})
+    const one = await db.arrays('SELECT 1 as one')
+    expect(one).toEqual([[1]])
+    const two = await db.arrays`SELECT ${'string'} as one`
+    expect(two).toEqual([['string']])
+    await db.close()
+  })
+
+  test('arraysWithFields', async () => {
+    const db = Adapter.fromURL({pool: 1})
+    const one = await db.arraysWithFields('SELECT 1 as one')
+    testField(one.fields[0])
+    expect(one.result).toEqual([[1]])
+    await db.close()
+  })
+
+  test('value', async () => {
+    const db = Adapter.fromURL({pool: 1})
+    const one = await db.value('SELECT 1 as one')
+    expect(one).toEqual(1)
+    const two = await db.value`SELECT ${'string'} as one`
+    expect(two).toEqual('string')
+    await db.close()
+  })
+
+  test('valueWithFields', async () => {
+    const db = Adapter.fromURL({pool: 1})
+    const one = await db.valueWithFields('SELECT 1 as one')
+    testField(one.fields[0])
+    expect(one.result).toEqual(1)
+    await db.close()
   })
 
   describe('exec', () => {
@@ -275,3 +294,13 @@ describe('Adapter', () => {
     })
   })
 })
+
+const testField = (field?: FieldInfo) => {
+  expect(field?.name).toBe('one')
+  expect(typeof field?.tableID).toBe('number')
+  expect(typeof field?.columnID).toBe('number')
+  expect(typeof field?.dataTypeID).toBe('number')
+  expect(typeof field?.dataTypeSize).toBe('number')
+  expect(typeof field?.dataTypeModifier).toBe('number')
+  expect(typeof field?.format).toBe('number')
+}

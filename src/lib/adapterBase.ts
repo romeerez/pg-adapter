@@ -1,5 +1,5 @@
 import {Socket as NativeSocket} from 'net'
-import {DecodeTypes, PgError, ResultMode, Log, Task, Socket, Prepared} from '../types'
+import {DecodeTypes, PgError, ResultMode, Log, Task, Socket, Prepared, ResultWithFields} from '../types'
 import {addTaskToAdapter, createTask} from './task'
 import {sql2} from './sql'
 import {defaultLog, noopLog} from './log'
@@ -26,12 +26,17 @@ export class AdapterBase {
 
   connect() {}
 
-  performQuery(mode: ResultMode, query: string | TemplateStringsArray, args?: any[], prepared?: Prepared) {
+  performQuery<T = any>(mode: ResultMode, query: string | TemplateStringsArray, args?: any[], prepared?: Prepared, getFieldsInfo?: boolean) {
     this.connect()
-    return new Promise((resolve, reject) => {
+    return new Promise<T>((resolve, reject) => {
       const error: PgError = new Error()
       const task = createTask({
-        mode, error, resolve, reject, prepared,
+        mode,
+        error,
+        resolve,
+        reject,
+        prepared,
+        getFieldsInfo,
         adapter: this,
         query: sql2(query, args),
         decodeTypes: this.decodeTypes,
@@ -40,20 +45,36 @@ export class AdapterBase {
     })
   }
 
-  query(sql: string | TemplateStringsArray, ...args: any[]) {
-    return this.performQuery(ResultMode.objects, sql, args)
+  query<T = any>(sql: string | TemplateStringsArray, ...args: any[]) {
+    return this.performQuery<T>(ResultMode.objects, sql, args)
   }
 
-  objects(sql: string | TemplateStringsArray, ...args: any[]) {
-    return this.performQuery(ResultMode.objects, sql, args)
+  queryWithFields<T = any>(sql: string | TemplateStringsArray, ...args: any[]) {
+    return this.performQuery<ResultWithFields<T>>(ResultMode.objects, sql, args, undefined, true)
   }
 
-  arrays(sql: string | TemplateStringsArray, ...args: any[]) {
-    return this.performQuery(ResultMode.arrays, sql, args)
+  objects<T = any>(sql: string | TemplateStringsArray, ...args: any[]) {
+    return this.performQuery<T>(ResultMode.objects, sql, args)
   }
 
-  value(sql: string | TemplateStringsArray, ...args: any[]) {
-    return this.performQuery(ResultMode.value, sql, args)
+  objectsWithFields<T = any>(sql: string | TemplateStringsArray, ...args: any[]) {
+    return this.performQuery<ResultWithFields<T>>(ResultMode.objects, sql, args, undefined, true)
+  }
+
+  arrays<T = any>(sql: string | TemplateStringsArray, ...args: any[]) {
+    return this.performQuery<T>(ResultMode.arrays, sql, args)
+  }
+
+  arraysWithFields<T = any>(sql: string | TemplateStringsArray, ...args: any[]) {
+    return this.performQuery<ResultWithFields<T>>(ResultMode.arrays, sql, args, undefined, true)
+  }
+
+  value<T>(sql: string | TemplateStringsArray, ...args: any[]) {
+    return this.performQuery<T>(ResultMode.value, sql, args)
+  }
+
+  valueWithFields<T>(sql: string | TemplateStringsArray, ...args: any[]) {
+    return this.performQuery<ResultWithFields<T>>(ResultMode.value, sql, args, undefined, true)
   }
 
   exec(sql: string | TemplateStringsArray, ...args: any[]) {

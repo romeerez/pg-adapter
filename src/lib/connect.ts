@@ -51,7 +51,7 @@ class Connect {
 
   socketConnect() {
     const {port, host} = this.settings
-    return new Promise(resolve =>
+    return new Promise<void>(resolve =>
       this.socket.connect(port, host, resolve)
     )
   }

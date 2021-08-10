@@ -91,6 +91,38 @@ const nothing = await db.exec('TRUNCATE TABLE users CASCADE')
 await db.close() // it will wait till all queries finish
 ```
 
+By default result has `any` type, but you can provide the type:
+```ts
+type ObjectType = {
+  id: number
+  name: string
+}
+
+const objects = await db.query<ObjectType>('SELECT * FROM example')
+console.log(object.id, object.name)
+```
+
+For simplicity these methods above gives you only the result, in case if you need to get columns info there are methods `withFields`:
+
+```js
+const { fields, result } = await db.objectsWithFields('SELECT * FROM example')
+const { fields, result } = await db.arraysWithFields('SELECT * FROM example')
+const { fields, result } = await db.valueWithFields('SELECT * FROM example')
+```
+
+`fields` is an array of `FieldInfo`:
+```ts
+type FieldInfo = {
+  name: string
+  tableID: number
+  columnID: number
+  dataTypeID: number
+  dataTypeSize: number // -1 for variable length
+  dataTypeModifier: number // see pg_attribute.atttypmod
+  format: number // 0 for text, 1 for binary
+}
+```
+
 ## Escape values
 
 Queries can handle escaping by themselves using template strings:
