@@ -1,18 +1,43 @@
-import {Socket as NativeSocket} from 'net'
-import {AdapterBase} from './lib/adapterBase'
+import { Socket as NativeSocket } from 'net'
+import { AdapterBase } from './lib/adapterBase'
+import { Value } from './lib/quote'
+import { PgError as PgErrorClass } from './lib/error'
+
+export interface PgNotice {
+  message: string
+  code: string
+  query?: string
+  level?: string
+  details?: string
+  hint?: string
+  position?: string
+  innerPosition?: string
+  innerQuery?: string
+  trace?: string
+  schema?: string
+  table?: string
+  column?: string
+  dataType?: string
+  constraint?: string
+  file?: string
+  line?: string
+  process?: string
+}
+
+export type PgError = PgErrorClass
 
 export type ResultWithFields<T = any> = { fields: FieldInfo[], result: T }
 
 export interface Socket extends NativeSocket {
-  task?: Task,
-  dataListener?: (data: Buffer) => any,
-  queryStartTime?: [number, number],
-  prepared: {[key: string]: boolean}
+  task?: Task
+  dataListener?: (data: Buffer) => void
+  queryStartTime?: [number, number]
+  prepared: { [key: string]: boolean }
 }
 
 export interface Creds {
-  user: string,
-  password: string,
+  user: string
+  password: string
 }
 
 export interface ConnectionSettingType {
@@ -24,44 +49,24 @@ export interface ConnectionSettingType {
 }
 
 export interface Log {
-  start: (socket: Socket, task: Task) => any,
-  finish: (socket: Socket, task: Task) => any,
+  start(socket: Socket, task: Task): void
+  finish(socket: Socket, task: Task): void
 }
 
 export interface AdapterProps extends Partial<ConnectionSettingType> {
-  pool?: number,
-  log?: boolean | Log,
+  pool?: number
+  log?: boolean | Log
   decodeTypes?: DecodeTypes
 }
 
-export interface PgError extends Error {
-  message: string,
-  query?: string,
-  level?: string,
-  details?: string,
-  hint?: string,
-  position?: string,
-  innerPosition?: string,
-  innerQuery?: string,
-  trace?: string,
-  schema?: string,
-  table?: string,
-  column?: string,
-  dataType?: string,
-  constraint?: string,
-  file?: string,
-  line?: string,
-  process?: string,
-}
-
 export interface AuthData {
-  clientNonce?: string,
-  signature?: string,
+  clientNonce?: string
+  signature?: string
 }
 
-export type DecodeFunction = (data: Buffer, pos: number, size: number) => any
+export type DecodeFunction = (data: Buffer, pos: number, size: number) => void
 
-export type DecodeTypes = {[key: string]: DecodeFunction}
+export type DecodeTypes = { [key: string]: DecodeFunction }
 
 export enum ResultMode {
   objects = 0,
@@ -81,45 +86,46 @@ export type FieldInfo = {
 }
 
 export interface ParseInfo {
-  resultNumber: number,
-  skipNextValues: boolean,
-  type?: number,
-  names?: Array<string>,
-  types?: Uint32Array,
-  columnsCount?: number,
+  resultNumber: number
+  skipNextValues: boolean
+  type?: number
+  names?: Array<string>
+  types?: Uint32Array
+  columnsCount?: number
   fieldsInfo?: FieldInfo[]
 }
 
 export interface Task {
-  adapter: AdapterBase,
-  mode: ResultMode,
-  error: PgError,
-  query: string,
+  adapter: AdapterBase
+  mode: ResultMode
+  error: PgError
+  query: string
   resolve: (...args: any[]) => any,
-  reject: (err: PgError) => any,
-  finish: (socket: Socket, task: Task) => any,
-  decodeTypes: DecodeTypes,
-  parseInfo: ParseInfo,
+  reject: (err: PgError) => void
+  finish: (socket: Socket, task: Task) => void
+  decodeTypes: DecodeTypes
+  failed?: boolean
+  authData?: AuthData
+  result?: unknown
+  parseInfo: ParseInfo
   getFieldsInfo?: boolean
-  failed?: boolean,
-  authData?: AuthData,
-  result?: any[] | undefined,
-  next?: Task,
-  last?: Task,
-  prepared?: Prepared,
+  next?: Task
+  last?: Task
+  prepared?: Prepared
+  notices?: PgNotice[]
 }
 
-export interface Prepared {
-  sql: string,
-  name: string,
-  performQuery<T = any>(mode: ResultMode, args: any[], getFieldsInfo?: boolean): Promise<T>,
-  query<T = any>(...args: any[]): Promise<T>
-  queryWithFields<T = any>(...args: any[]): Promise<ResultWithFields<T>>
-  objects<T = any>(...args: any[]): Promise<T>
-  objectsWithFields<T = any>(...args: any[]): Promise<ResultWithFields<T>>
-  arrays<T = any>(...args: any[]): Promise<T>
-  arraysWithFields<T = any>(...args: any[]): Promise<ResultWithFields<T>>
-  value<T = any>(...args: any[]): Promise<T>
-  valueWithFields<T = any>(...args: any[]): Promise<ResultWithFields<T>>
-  exec<T = any>(...args: any[]): Promise<T>
+export interface Prepared<Args extends Value[] = Value[]> {
+  sql: string
+  name: string
+  performQuery<T = any>(mode: ResultMode, args?: Args, getFieldsInfo?: boolean): Promise<T>
+  query<T>(...args: Args): Promise<T>
+  queryWithFields<T>(...args: Args): Promise<ResultWithFields<T>>
+  objects<T>(...args: Args): Promise<T>
+  objectsWithFields<T>(...args: Args): Promise<ResultWithFields<T>>
+  arrays<T>(...args: Args): Promise<T>
+  arraysWithFields<T>(...args: Args): Promise<ResultWithFields<T>>
+  value<T>(...args: Args): Promise<T>
+  valueWithFields<T>(...args: Args): Promise<ResultWithFields<T>>
+  exec<T>(...args: Args): Promise<T>
 }

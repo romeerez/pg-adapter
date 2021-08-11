@@ -1,33 +1,41 @@
 const singleQuoteRegex = /'/g
 const doubleQuoteRegex = /"/g
 
-const quoteValue = (value: any) => {
+// eslint-disable-next-line
+export type Value = any
+
+const quoteValue = (value: Value): string => {
   const type = typeof value
-  if (type === 'number')
-    return value
+  if (type === 'number') return String(value)
   else if (type === 'string')
-    return `'${value.replace(doubleQuoteRegex, '\\"')}'`
-  else if (type === 'boolean')
-    return value ? 'true' : 'false'
-  else if (type !== null && type !== undefined && type === 'object')
-    quoteArray(value)
+    return `"${(value as string)
+      .replace(doubleQuoteRegex, '\\"')
+      .replace(singleQuoteRegex, "''")}"`
+  else if (type === 'boolean') return value ? 'true' : 'false'
+  else if (value instanceof Date) return `"${value.toISOString()}"`
+  else if (Array.isArray(value)) return quoteArray(value)
+  else if (type === null || type === undefined) return 'NULL'
+  else if (typeof value.__raw === 'string') return value.__raw
   else
-    return 'NULL'
+    return `"${JSON.stringify(value)
+      .replace(doubleQuoteRegex, '\\"')
+      .replace(singleQuoteRegex, "''")}"`
 }
 
-const quoteArray = (array: any[]) =>
-  `'{${array.map(quoteValue).join(',')}}'`
+const quoteArray = (array: Value[]) => `'{${array.map(quoteValue).join(',')}}'`
 
-export const quote = (value: any) => {
+export const quote = (value: Value): string => {
   const type = typeof value
-  if (type === 'number')
-    return value
+  if (type === 'number') return `${value}`
   else if (type === 'string')
-    return `'${value.replace(singleQuoteRegex, "''")}'`
-  else if (type === 'boolean')
-    return value ? 'true' : 'false'
-  else if (type !== null && type !== undefined && type === 'object')
-    quoteArray(value)
-  else
-    return 'NULL'
+    return `'${(value as string).replace(singleQuoteRegex, "''")}'`
+  else if (type === 'boolean') return value ? 'true' : 'false'
+  else if (value instanceof Date) return `'${value.toISOString()}'`
+  else if (Array.isArray(value)) return quoteArray(value)
+  else if (value === null || value === undefined) return 'NULL'
+  else if (typeof value.__raw === 'string') return value.__raw
+  else return `'${JSON.stringify(value).replace(singleQuoteRegex, "''")}'`
 }
+
+// eslint-disable-next-line
+export const raw = (value: string): any => ({ __raw: value })

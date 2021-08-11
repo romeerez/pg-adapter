@@ -1,11 +1,11 @@
-import {Adapter} from '../adapter'
-import {removeListener} from './messageHandler'
+import { Adapter } from '../adapter'
+import { removeListener } from './messageHandler'
 
 export const close = async (adapter: Adapter) => {
   await adapter.sync()
 
   adapter.connected = false
-  for (let socket of adapter.sockets) {
+  for (const socket of adapter.sockets) {
     socket.destroy()
     removeListener(socket)
   }

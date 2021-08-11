@@ -1,15 +1,15 @@
-import {Task, Creds, Socket} from '../types'
-import {getMessageLength, skipMessage} from './buffer'
-import {auth} from './handlers/auth'
-import {complete} from './handlers/complete'
-import {parseError} from './handlers/error'
-import {parseDescription} from './handlers/parseDescription'
-import {parseRow} from './handlers/parseRow'
+import { Task, Creds, Socket } from '../types'
+import { getMessageLength, skipMessage } from './buffer'
+import { auth } from './handlers/auth'
+import { complete } from './handlers/complete'
+import { parseError } from './handlers/errorOrNotice'
+import { parseDescription } from './handlers/parseDescription'
+import { parseRow } from './handlers/parseRow'
 
 interface Message {
-  buffer: Buffer,
-  cutMessageLength: number,
-  cutMessageAllocated: number,
+  buffer: Buffer
+  cutMessageLength: number
+  cutMessageAllocated: number
 }
 
 enum codes {
@@ -44,7 +44,13 @@ enum codes {
 const copy = (message: Message, data: Buffer, dataPos: number) =>
   data.copy(message.buffer, message.cutMessageAllocated, dataPos)
 
-const listener = (socket: Socket, message: Message, creds: Creds, data: Buffer, size = data.length) => {
+const listener = (
+  socket: Socket,
+  message: Message,
+  creds: Creds,
+  data: Buffer,
+  size = data.length,
+) => {
   let pos = 0
   let len = message.cutMessageLength
   if (len !== 0) {
@@ -79,10 +85,15 @@ const listener = (socket: Socket, message: Message, creds: Creds, data: Buffer, 
       parseDescription(socket, task, data, pos)
     } else if (code === codes.readyForQueryCode) {
       return task.finish(socket, task)
-    } else if (code === codes.errorResponseCode || code === codes.noticeResponseCode) {
-      const {level} = parseError(task, data, pos)
-      if (level !== 'ERROR')
-        return task.finish(socket, task)
+    } else if (code === codes.errorResponseCode) {
+      const error = parseError(task, data, pos)
+      task.failed = true
+      Object.assign(task.error, error)
+      if (error.level !== 'ERROR') return task.finish(socket, task)
+    } else if (code === codes.noticeResponseCode) {
+      const notice = parseError(task, data, pos)
+      if (!task.notices) task.notices = [notice]
+      else task.notices.push(notice)
     } else if (code === codes.authenticationCode) {
       auth(socket, task, creds, data, pos)
     } else if (code === codes.commandCompleteCode) {
@@ -92,7 +103,11 @@ const listener = (socket: Socket, message: Message, creds: Creds, data: Buffer, 
         code !== codes.parameterStatusCode &&
         code !== codes.backendKeyDataCode
       ) {
-        console.warn(`Handling of ${String.fromCharCode(code)} code is not implemented yet`)
+        console.warn(
+          `Handling of ${String.fromCharCode(
+            code,
+          )} code is not implemented yet`,
+        )
       }
     }
     pos = skipMessage(data, pos)

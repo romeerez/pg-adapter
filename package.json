@@ -1,10 +1,13 @@
 {
   "name": "pg-adapter",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Efficient and usable Postgresql client with pool",
   "main": "build/adapter.js",
   "types": "build/adapter.d.ts",
-  "repository": "https://gitlab.com/romikus/pg-adapter",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/romeerez/pg-adapter.git"
+  },
   "author": "Roman Kushyn",
   "license": "MIT",
   "keywords": [
@@ -16,26 +19,37 @@
     "pool"
   ],
   "scripts": {
+    "start": "tsc --watch",
     "test": "jest",
     "build": "tsc",
-    "prepublish": "build"
+    "prepublish": "tsc",
+    "lint": "eslint --fix src"
   },
   "dependencies": {
-    "chalk": "^3.0.0"
+    "chalk": "^3.0.0",
+    "pg-promise": "^10.9.5"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.11.5",
     "@types/jest": "^26.0.24",
     "@types/node": "^13.11.0",
+    "@typescript-eslint/eslint-plugin": "^4.8.2",
+    "@typescript-eslint/parser": "^4.8.2",
+    "babel-jest": "^26.3.0",
     "dotenv": "^8.2.0",
-    "jest": "^25.1.0",
+    "eslint": "^7.14.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "jest": "^26.4.2",
+    "prettier": "^2.2.1",
     "ts-jest": "^25.3.1",
     "typescript": "^4.3.5"
   },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "modulePaths": [
-      "src"
-    ]
+  "bugs": {
+    "url": "https://github.com/romeerez/pg-adapter/issues"
+  },
+  "homepage": "https://github.com/romeerez/pg-adapter#readme",
+  "directories": {
+    "test": "test"
   }
 }

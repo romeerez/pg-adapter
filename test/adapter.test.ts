@@ -1,6 +1,6 @@
-import {Adapter, Transaction} from '../src/adapter'
-import {FieldInfo, ResultMode} from '../src/types'
-import {defaultLog, noopLog} from '../src/lib/log'
+import { Adapter, Transaction } from '../src/adapter'
+import { ResultMode, FieldInfo } from '../src/types'
+import { defaultLog, noopLog } from '../src/lib/log'
 import 'dotenv/config'
 
 Adapter.defaultLog = false
@@ -22,7 +22,11 @@ describe('Adapter', () => {
         user: 'user',
         password: 'password',
       }
-      const adapter = new Adapter({ ...connectionSettings, pool: 123, log: false })
+      const adapter = new Adapter({
+        ...connectionSettings,
+        pool: 123,
+        log: false,
+      })
       expect(adapter.connectionSettings).toMatchObject(connectionSettings)
       expect(adapter.pool).toEqual(123)
       expect(adapter.log).toEqual(noopLog)
@@ -30,8 +34,8 @@ describe('Adapter', () => {
 
     it('has default values', () => {
       const a1 = new Adapter({})
-      const a2 = new Adapter();
-      [a1, a2].forEach(a => {
+      const a2 = new Adapter()
+      ;[a1, a2].forEach((a) => {
         expect(a.connectionSettings).toMatchObject({
           host: '127.0.0.1',
           port: 5432,
@@ -84,7 +88,7 @@ describe('Adapter', () => {
       // and scram-sha-256 in pg_hba.conf
 
       expect(async () => {
-        const db = Adapter.fromURL({pool: 1})
+        const db = Adapter.fromURL({ pool: 1 })
         await db.connect()
         await db.close()
       }).not.toThrow()
@@ -93,7 +97,7 @@ describe('Adapter', () => {
 
   describe('performQuery', () => {
     it('works after connect', async () => {
-      const db = Adapter.fromURL({pool: 1})
+      const db = Adapter.fromURL({ pool: 1 })
       await db.connect()
       const result = await db.performQuery(ResultMode.value, 'SELECT 1')
       expect(result).toEqual(1)
@@ -101,14 +105,24 @@ describe('Adapter', () => {
     })
 
     it('connects automatically', async () => {
-      const db = Adapter.fromURL({pool: 1})
+      const db = Adapter.fromURL({ pool: 1 })
       const result = await db.performQuery(ResultMode.value, 'SELECT 1')
       expect(result).toEqual(1)
       await db.close()
     })
 
+    it('accept Promise with sql', async () => {
+      const db = Adapter.fromURL({ pool: 1 })
+      const result = await db.performQuery(
+        ResultMode.value,
+        Promise.resolve('SELECT 1'),
+      )
+      expect(result).toEqual(1)
+      await db.close()
+    })
+
     it('can perform multiple queries in queue', async () => {
-      const db = Adapter.fromURL({pool: 1})
+      const db = Adapter.fromURL({ pool: 1 })
       const results = await Promise.all([
         db.performQuery(ResultMode.value, 'SELECT 1'),
         db.performQuery(ResultMode.value, 'SELECT 2'),
@@ -123,59 +137,62 @@ describe('Adapter', () => {
     it('can load wide table data', async () => {
       const date = Date.UTC(2020, 0, 1)
       let values = [
-        // {sql: 'null', value: null},
-        // {sql: '1', value: 1},
-        // {sql: '2', value: 2},
-        // {sql: '3', value: 3},
-        // {sql: '1.5', value: 1.5},
-        // {sql: '2.5', value: 2.5},
-        // {sql: '3.5', value: 3.5},
-        // {sql: 'false', value: false},
-        {sql: 'true', value: true},
-        // {sql: "'01.01.2020'::date", value: +date},
+        { sql: 'null', value: null },
+        { sql: '1', value: 1 },
+        { sql: '2', value: 2 },
+        { sql: '3', value: 3 },
+        { sql: '1.5', value: 1.5 },
+        { sql: '2.5', value: 2.5 },
+        { sql: '3.5', value: 3.5 },
+        { sql: 'false', value: false },
+        { sql: 'true', value: true },
+        { sql: "'01.01.2020'::date", value: +date },
       ]
-      // for (let i = 0; i < 5; i++)
-      //   values = [...values, ...values]
+      for (let i = 0; i < 5; i++) values = [...values, ...values]
 
-      const db = Adapter.fromURL({pool: 1})
-      const rows = await db.performQuery(
-        ResultMode.arrays, `SELECT ${values.map(value => value.sql)}`
-      ) as any[][]
+      const db = Adapter.fromURL({ pool: 1 })
+      const rows = (await db.performQuery(
+        ResultMode.arrays,
+        `SELECT ${values.map((value) => value.sql)}`,
+      )) as any[][]
+
       const row = rows[0]
+
       row.forEach((item, i) => {
-        if (item?.constructor === Date)
-          row[i] = +row[i]
+        if (item?.constructor === Date) row[i] = +row[i]
       })
-      expect(row).toEqual(values.map(value => value.value))
+
+      expect(row).toEqual(values.map((value) => value.value))
       await db.close()
     })
 
     it('can load many rows', async () => {
-      const db = Adapter.fromURL({pool: 1})
+      const db = Adapter.fromURL({ pool: 1 })
       const values: any[] = []
 
       const lorem =
         "'Lorem ipsum dolor sit amet,consectetur adipiscing elit," +
-        "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." +
-        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." +
-        "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur." +
-        "Excepteur sint occaecat cupidatat non proident," +
+        'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' +
+        'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' +
+        'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.' +
+        'Excepteur sint occaecat cupidatat non proident,' +
         "sunt in culpa qui officia deserunt mollit anim id est laborum.'"
 
       for (let i = 0; i < 1000; i++) {
         values.push([i + 1, lorem])
       }
-      const results = await db.performQuery(
-        ResultMode.arrays, `SELECT * FROM (VALUES ${
-          values.map(values => `(${values.join(', ')})`).join(', ')
-        }) t`
-      ) as any[]
+      const results = (await db.performQuery(
+        ResultMode.arrays,
+        `SELECT * FROM (VALUES ${values
+          .map((values) => `(${values.join(', ')})`)
+          .join(', ')}) t`,
+      )) as any[]
       expect(results.length).toEqual(values.length)
       await db.close()
     })
 
     it('can load multiple results', async () => {
-      const db = Adapter.fromURL({pool: 1, log: false})
+      const db = Adapter.fromURL({ pool: 1, log: false })
       const results = await db.value('SELECT 1; SELECT 2')
       expect(results).toEqual([1, 2])
       await db.close()
@@ -186,7 +203,7 @@ describe('Adapter', () => {
     const db = Adapter.fromURL({pool: 1})
     const one = await db.objects('SELECT 1 as one')
     expect(one).toEqual([{one: 1}])
-    const two = await db.objects`SELECT ${'string'} as one`
+    const two = await db.objects(`SELECT $1 as one`, ['string'])
     expect(two).toEqual([{one: 'string'}])
     await db.close()
   })
@@ -203,7 +220,7 @@ describe('Adapter', () => {
     const db = Adapter.fromURL({pool: 1})
     const one = await db.arrays('SELECT 1 as one')
     expect(one).toEqual([[1]])
-    const two = await db.arrays`SELECT ${'string'} as one`
+    const two = await db.arrays(`SELECT $1 as one`, ['string'])
     expect(two).toEqual([['string']])
     await db.close()
   })
@@ -220,7 +237,7 @@ describe('Adapter', () => {
     const db = Adapter.fromURL({pool: 1})
     const one = await db.value('SELECT 1 as one')
     expect(one).toEqual(1)
-    const two = await db.value`SELECT ${'string'} as one`
+    const two = await db.value(`SELECT $1 as one`, ['string'])
     expect(two).toEqual('string')
     await db.close()
   })
@@ -235,11 +252,9 @@ describe('Adapter', () => {
 
   describe('exec', () => {
     it('return nothing', async () => {
-      const db = Adapter.fromURL({pool: 1})
+      const db = Adapter.fromURL({ pool: 1 })
       const one = await db.exec('SELECT 1 as one')
       expect(one).toEqual(undefined)
-      const two = await db.exec`SELECT ${'string'} as one`
-      expect(two).toEqual(undefined)
       await db.close()
     })
   })
@@ -247,10 +262,17 @@ describe('Adapter', () => {
   describe('transaction', () => {
     it('creates a transaction', async () => {
       const queries: string[] = []
-      const db = Adapter.fromURL({pool: 1, log: {
-        start: () => {},
-        finish: (socket, {query}) => { queries.push(query) },
-      }})
+      const db = Adapter.fromURL({
+        pool: 1,
+        log: {
+          start: () => {
+            // noop
+          },
+          finish: (socket, { query }) => {
+            queries.push(query)
+          },
+        },
+      })
       db.transaction((t: Transaction) => {
         t.exec('SELECT 2')
       })
@@ -258,7 +280,7 @@ describe('Adapter', () => {
       await db.sync()
       expect(queries).toEqual(['BEGIN', 'SELECT 2', 'COMMIT', 'SELECT 1'])
 
-      const target = {key: 'value'}
+      const target = { key: 'value' }
       let value
       await db.wrapperTransaction(target, (t) => {
         value = t.key
@@ -274,7 +296,6 @@ describe('Adapter', () => {
         })
       } catch (err) {
         error = err
-        console.log(err)
       }
       expect(error).toBeTruthy()
 
@@ -284,12 +305,20 @@ describe('Adapter', () => {
 
   describe('prepared', () => {
     it('makes prepared statements', async () => {
-      const db = Adapter.fromURL({pool: 1})
-      const q = db.prepare('queryName', 'text', 'integer', 'date')
-        `SELECT $1 AS text, $2 AS integer, $3 AS date`
-      const result = await q.performQuery(0, ['text', 123, '01.01.2020'])
-      const date = Date.UTC(2020, 0, 1)
-      expect(result).toEqual([{text: 'text', integer: 123, date: new Date(date)}])
+      const db = Adapter.fromURL({ pool: 1 })
+
+      const q = db.prepare<[string, number, Date, Date]>({
+        name: 'queryName',
+        args: ['text', 'integer', 'date', 'date'],
+        query: 'SELECT $1 AS text, $2 AS integer, $3 AS date, $4 AS sql_date',
+      })
+
+      const date = new Date(Date.UTC(2020, 0, 1))
+      const result = await q.query('text', 123, date, db.raw("'01.01.2020'"))
+
+      expect(result).toEqual([
+        { text: 'text', integer: 123, date, sql_date: date },
+      ])
       await db.close()
     })
   })

@@ -1,7 +1,10 @@
 .idea
+yarn-error.log
 bench
 node_modules
 yarn.lock
-test*
+.d.ts
+.js
+test.ts
 .env
 build

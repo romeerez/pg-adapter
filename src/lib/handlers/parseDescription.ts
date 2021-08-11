@@ -1,8 +1,13 @@
-import {Socket} from 'net'
-import {decodeInt32, decodeInt16, isPositiveInt16} from '../buffer'
-import {Task, ResultMode, FieldInfo} from '../../types'
+import { Socket } from 'net'
+import { decodeInt32, decodeInt16, isPositiveInt16 } from '../buffer'
+import { Task, ResultMode, FieldInfo } from '../../types'
 
-export const parseDescription = (socket: Socket, request: Task, data: Buffer, pos: number) => {
+export const parseDescription = (
+  socket: Socket,
+  request: Task,
+  data: Buffer,
+  pos: number,
+) => {
   let result
   const mode = request.mode
   const { parseInfo, getFieldsInfo } = request
@@ -47,13 +52,10 @@ export const parseDescription = (socket: Socket, request: Task, data: Buffer, po
     parseInfo.columnsCount = columnsCount
   }
 
-  const {resultNumber} = parseInfo
-  if (resultNumber === 0)
-    request.result = result
-  else if (resultNumber === 1)
-    request.result = [request.result, result]
-  else
-    (request.result as any[])[resultNumber] = result
+  const { resultNumber } = parseInfo
+  if (resultNumber === 0) request.result = result
+  else if (resultNumber === 1) request.result = [request.result, result]
+  else (request.result as unknown[])[resultNumber] = result
 }
 
 const collectFieldsInfo = (fieldsInfo: FieldInfo[], data: Buffer, index: number, pos: number, name: string, dataTypeID: number) => {
