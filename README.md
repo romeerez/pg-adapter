@@ -246,9 +246,14 @@ This will give info for all types in database, get needed `oid`.
 
 ```js
 const db = new Adapter(params)
+
+const jsonFromBuffer = (buffer, pos, size) => {
+  return JSON.parse(buffer.slice(pos, pos + size).toString())
+}
+
 Object.assign(db.decodeTypes, {
-  114: JSON.parse, // for json
-  3802: JSON.parse, // for jsonb
+  114: jsonFromBuffer, // for json
+  3802: jsonFromBuffer, // for jsonb
 })
 ```
 
