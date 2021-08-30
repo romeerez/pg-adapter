@@ -235,19 +235,19 @@ Which is not true for `pg` adapter, so considered as feature.
 
 ## Database types
 
-By default numbers, booleans and dates are parsing from response.
-To add json parsing, for example:
+By default only numbers, booleans and dates are parsed from database response.
+If you want to parse some specific type, for example, json type, run this sql:
 
 ```sql
 SELECT typname, oid, typarray FROM pg_type ORDER BY oid
 ```
 
-This will give info for all types in database, get needed `oid`.
+This will give info for all types in database, get needed `oid`, write a parser function and add it to `decodeTypes`:
 
 ```js
 const db = new Adapter(params)
 
-const jsonFromBuffer = (buffer, pos, size) => {
+const jsonFromBuffer = (buffer: Buffer, pos: number, size: number) => {
   return JSON.parse(buffer.slice(pos, pos + size).toString())
 }
 
