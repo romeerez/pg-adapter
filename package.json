@@ -1,9 +1,10 @@
 {
   "name": "pg-adapter",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "Efficient and usable Postgresql client with pool",
   "main": "build/adapter.js",
   "types": "build/adapter.d.ts",
+  "files": ["./build/**/*"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/romeerez/pg-adapter.git"
