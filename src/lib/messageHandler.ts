@@ -41,9 +41,7 @@ enum codes {
   portalSuspendedCode = 's'.charCodeAt(0),
 }
 
-const copy = (message: Message, data: Buffer, dataPos: number) =>
-  data.copy(message.buffer, message.cutMessageAllocated, dataPos)
-
+// TODO: requires proper testing with edge cases
 const listener = (
   socket: Socket,
   message: Message,
@@ -54,26 +52,35 @@ const listener = (
   let pos = 0
   let len = message.cutMessageLength
   if (len !== 0) {
+    // calculate length if it didn't fit in prev block
+    if (len === -1) {
+      data.copy(message.buffer, message.cutMessageAllocated, 0, 5 - message.cutMessageAllocated)
+      len = getMessageLength(message.buffer, 0)
+      message.cutMessageLength = len
+      if (message.buffer.length < len)
+        message.buffer = Buffer.alloc(len + 1, message.buffer)
+    }
+
     if (len > message.cutMessageAllocated + data.length) {
-      copy(message, data, 0)
+      data.copy(message.buffer, message.cutMessageAllocated)
       message.cutMessageAllocated += data.length
       return
     }
 
     const copySize = len - message.cutMessageAllocated
-    copy(message, data, 0)
+    data.copy(message.buffer, message.cutMessageAllocated)
     message.cutMessageLength = 0
     message.cutMessageAllocated = 0
     listener(socket, message, creds, message.buffer, len)
     pos = copySize + 1
   }
-  len = getMessageLength(data, pos)
   const task = socket.task as Task
   while (pos < size) {
-    if (pos + len > size) {
+    len = pos + 4 < size ? getMessageLength(data, pos) : -1
+    if (len === -1 || pos + len > size) {
       if (message.buffer.length < len)
         message.buffer = Buffer.alloc(len + 1, message.buffer)
-      copy(message, data, pos)
+      data.copy(message.buffer, message.cutMessageAllocated, pos)
       message.cutMessageAllocated = size - pos
       message.cutMessageLength = len
       break
@@ -104,14 +111,11 @@ const listener = (
         code !== codes.backendKeyDataCode
       ) {
         console.warn(
-          `Handling of ${String.fromCharCode(
-            code,
-          )} code is not implemented yet`,
+          `Handling of ${code} code is not implemented yet`,
         )
       }
     }
-    pos = skipMessage(data, pos)
-    len = getMessageLength(data, pos)
+    pos += len + 1
   }
 }
 
@@ -121,7 +125,9 @@ export const handleMessage = (socket: Socket, creds: Creds) => {
     cutMessageLength: 0,
     cutMessageAllocated: 0,
   }
-  socket.dataListener = (data: Buffer) => listener(socket, message, creds, data)
+  socket.dataListener = (data: Buffer) => {
+    listener(socket, message, creds, data)
+  }
   socket.on('data', socket.dataListener)
 }
 

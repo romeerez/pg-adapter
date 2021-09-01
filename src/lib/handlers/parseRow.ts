@@ -8,13 +8,13 @@ export const parseRow = (
   data: Buffer,
   pos: number,
 ) => {
-  const { mode, parseInfo } = task
+  const {mode, parseInfo} = task
   if (mode === ResultMode.skip || parseInfo.skipNextValues) return
 
   pos += 7
 
   let row
-  if (mode === ResultMode.objects)
+  if (mode === ResultMode.objects) {
     row = parseObjects(
       parseInfo.columnsCount as number,
       task.decodeTypes,
@@ -23,7 +23,7 @@ export const parseRow = (
       data,
       pos,
     )
-  else if (mode === ResultMode.arrays)
+  } else if (mode === ResultMode.arrays)
     row = parseArrays(
       parseInfo.columnsCount as number,
       task.decodeTypes,
