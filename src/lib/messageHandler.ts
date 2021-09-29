@@ -76,8 +76,8 @@ const listener = (
   }
   const task = socket.task as Task
   while (pos < size) {
-    len = pos + 4 < size ? getMessageLength(data, pos) : -1
-    if (len === -1 || pos + len > size) {
+    len = pos + 5 < size ? getMessageLength(data, pos) : -1
+    if (len === -1 || pos + len + 1 > size) {
       if (message.buffer.length < len)
         message.buffer = Buffer.alloc(len + 1, message.buffer)
       data.copy(message.buffer, message.cutMessageAllocated, pos)
